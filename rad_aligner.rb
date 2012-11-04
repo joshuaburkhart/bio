@@ -303,7 +303,7 @@ assembly_scores.each { |a|
                locus_name += "-#{x}"
            else
                puts "ERROR: RAD ALIGNMENT DIRECTION '#{fr}' UNRECOGNIZABLE"
-               exit
+               exit 1
            end
 
            tmp_idx = tmp_locus_ary.index { |l| l.name == locus_name}
@@ -312,8 +312,8 @@ assembly_scores.each { |a|
                locus_align.addRadTagAlign(rad_tag_align)
                locus_align.n = n
            else
-               put "ERROR: DETECTED LOCUS '#{locus_name}' WITHOUT CUTSITE"
-               exit
+               puts "ERROR: DETECTED LOCUS '#{locus_name}' WITHOUT CUTSITE"
+               exit 1
            end
         end
     }
