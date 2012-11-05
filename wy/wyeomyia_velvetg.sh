@@ -33,5 +33,5 @@ echo input directory: $inputdir
 wyeomyia_rq.sh \
 "mkdir -p /scratch/$USER/\$PBS_JOBID/velvet_out/$inputdir && \
 cp $1/* /scratch/$USER/\$PBS_JOBID/velvet_out/$inputdir/ && \
-velvetg /scratch/$USER/\$PBS_JOBID/velvet_out/$inputdir -min_contig_lgth 200 -ins_length 400 -exp_cov $5 -read_trkg yes" \
+velvetg /scratch/$USER/\$PBS_JOBID/velvet_out/$inputdir -min_contig_lgth 500 -ins_length 400 -exp_cov $5 -cov_cutoff 5.2 -max_coverage 300" \
 $QUEUE vlvtg_$2-$3_k$4 $PROCS $NODE_NAME

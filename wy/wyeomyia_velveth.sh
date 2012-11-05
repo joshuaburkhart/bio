@@ -35,7 +35,7 @@ wyeomyia_rq.sh \
 cp $1 /scratch/$USER/\$PBS_JOBID/ && \
 cp $2 /scratch/$USER/\$PBS_JOBID/ && \
 mkdir -p /scratch/$USER/\$PBS_JOBID/velvet_out/velveth_maxfq-$3K_minfq-$4_k$5/$SUBDR/ && \
-velveth /scratch/$USER/\$PBS_JOBID/velvet_out/velveth_maxfq-$3K_minfq-$4_k$5/$SUBDR $5 -shortPaired -fastq -separate /scratch/$USER/\$PBS_JOBID/$inputfile1 /scratch/$USER/\$PBS_JOBID/$inputfile2 && \
+velveth /scratch/$USER/\$PBS_JOBID/velvet_out/velveth_maxfq-$3K_minfq-$4_k$5/$SUBDR $5 -shortPaired -separate -fastq /scratch/$USER/\$PBS_JOBID/$inputfile1 /scratch/$USER/\$PBS_JOBID/$inputfile2 -create_binary && \
 rm -f /scratch/$USER/\$PBS_JOBID/$inputfile1 && \
 rm -f /scratch/$USER/\$PBS_JOBID/$inputfile2" \
 $QUEUE vlvth_$3-$4_k$5 $PROCS $NODE_NAME
