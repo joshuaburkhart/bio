@@ -30,7 +30,7 @@ while true
 do
 
   qstat -n | grep jburkhar | awk '{$5=""; $10=""; $11=""; print $0}' > $TMP_FILE_1
-  diff $TMP_FILE_1 $TMP_FILE_2 | awk '{if($1==">"){$1="<<FINISHD>>"; print d, $0;} else if($1=="<"){$1="<<STARTED>>"; print d, $0;}}' "d=$(date)"
+  diff $TMP_FILE_1 $TMP_FILE_2 | awk '{if($1==">"){$1="<<FINISHD>>"; print d, $0;} else if($1=="<"){$1="<<STARTED>>"; print d, $0;}}' "d=$(date)" | tee -a qlog_job_activity.log
   cat $TMP_FILE_1 > $TMP_FILE_2
   sleep 5
 
