@@ -75,11 +75,15 @@ class LocusAlignment
     attr_accessor :expected
     attr_accessor :n
 
-    def initialize(cut_site_align)
-        @cut_site_align = cut_site_align
-        @offset = cut_site_align[:offset]
-        @ref_strand_name = cut_site_align[:ref_strand_name]
-        @name = "#{@ref_strand_name}-#{@offset}"
+    def initialize(cut_site_align=nil)
+        if(cut_site_align != nil)
+            @cut_site_align = cut_site_align
+            @offset = cut_site_align[:offset]
+            @ref_strand_name = cut_site_align[:ref_strand_name]
+            @name = "#{@ref_strand_name}-#{@offset}"
+        else
+            @name = "<unknown>"
+        end
         @rad_tag_align_ary = Array.new
         @actual = 0
         @expected = 2
@@ -92,10 +96,12 @@ class LocusAlignment
     end
 
     def to_s
-        msg = " "*2 + "Locus #{@name} has #{@rad_tag_align_ary.size} rad tags:\n"
-        msg += " "*6 + "CutSite ref_strand = #{@cut_site_align[:ref_strand_name]}, offset = #{@cut_site_align[:fr]}#{@cut_site_align[:offset]}, seq = #{@cut_site_align[:seq]}\n"
+        msg = " "*2 + "LOCUS: #{@name} WITH #{@rad_tag_align_ary.size} RAD TAG(S):\n"
+        if(!@cut_site_align.nil?)
+            msg += " "*6 + "CUT SITE: REFERENCE_STRAND = #{@cut_site_align[:ref_strand_name]}, OFFSET = #{@cut_site_align[:offset]} (#{@cut_site_align[:fr]}), SEQUENCE = #{@cut_site_align[:seq]}\n"
+        end
         @rad_tag_align_ary.each { |tag|
-            msg += " "*6+"RadTag name = #{tag[:name]}, offset = #{tag[:fr]}#{tag[:offset]}, seq = #{tag[:seq]}\n"
+            msg += " "*6+"RAD TAG: NAME = #{tag[:name]}, OFFSET = #{tag[:offset]} (#{tag[:fr]}), SEQUENCE = #{tag[:seq]}\n"
         }
         return msg
     end
@@ -136,7 +142,7 @@ class ContigAlignment
         @locus_align_ary.sort! { |i,j|
             i.rad_tag_align_ary.size <=> j.rad_tag_align_ary.size
         }
-        msg  = " "*1+"Contig #{@name}\n"
+        msg  = " "*1+"CONTIG: NAME = #{@name}\n"
         msg += " "*1+"-------" + "-"*@name.size + "\n"
         @locus_align_ary.each { |locus|
             msg += locus.to_s
@@ -181,7 +187,7 @@ class AssemblyAlignment
         @contig_ary.sort! { |i,j|
             i.locus_align_ary.size <=> j.locus_align_ary.size
         }
-        msg  = "Assembly #{@name}\n"
+        msg  = "ASSEMBLY: NAME = #{@name}\n"
         msg += "=========" + "="*@name.size + "\n"
         @contig_ary.each { |contig|
             msg += "\n" + contig.to_s
@@ -312,8 +318,10 @@ assembly_scores.each { |a|
                locus_align.addRadTagAlign(rad_tag_align)
                locus_align.n = n
            else
-               puts "ERROR: DETECTED LOCUS '#{locus_name}' WITHOUT CUTSITE"
-               exit 1
+               puts "WARNING: RAD TAG MATCHED LOCUS WITHOUT CUTSITE"
+               puts " RAD TAG: #{rad_tag_align.to_s}"
+               puts " LOCUS: #{locus_name}"
+               
            end
         end
     }
