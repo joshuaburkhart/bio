@@ -1,10 +1,45 @@
 #!/usr/bin/ruby
 
-#Usage: ruby rad_aligner.rb <cut site cohesive end sequence> <cut site sticky end sequence> </path/to/fasta/file/with/rad/tags> </path/to/fasta/file/with/contigs/1> [ ... </path/to/fasta/file/with/contigs/n>]
-
-#Example: ruby rad_aligner.rb C CGTAG ~/tmp/mock_rad_tags.fasta ~/tmp/mock_contigs.fasta
-
 require 'time'
+require 'optparse'
+
+options ={}
+optparse = OptionParser.new { |opts|
+    opts.banner = <<-EOS
+#Usage: ruby rad_aligner.rb -c <cut site cohesive end sequence> -s <cut site sticky end sequence> -t </path/to/fasta/file/with/rad/tags> -o </path/to/output/dir> </path/to/fasta/file/with/contigs/1> [ ... </path/to/fasta/file/with/contigs/n>]
+
+#Example: ruby rad_aligner.rb -c C -s CGTAG -t ~/tmp/mock_rad_tags.fasta -o ~/tmp/ ~/tmp/mock_contigs.fasta
+    EOS
+    opts.on('-h','--help','Display this screen'){
+        puts opts
+        exit
+    }
+    options[:cohesive_end] = nil
+    opts.on('-c','--cohesive SEQ','Cohesive End Sequence SEQ') { |seq|
+        options[:cohesive_end] = seq
+    }
+    options[:sticky_end] = nil
+    opts.on('-s','--sticky SEQ','Sticky End Sequence SEQ') { |seq|
+        options[:sticky_end] = seq
+    }
+    options[:rad_tag_file] = nil
+    opts.on('-t','--tag_file FILE','File Containing List of RAD Tags FILE') { |file|
+        options[:rad_tag_file] = file
+    }
+    options[:out_dir] = "."
+    opts.on('-o','--out_dir DIR','Directory to write output files to DIR') { |dir|
+        options[:out_dir] = dir
+    }
+}
+
+optparse.parse!
+if(options[:cohesive_end].nil?)
+    raise OptionParser::MissingArgument,"Cohesive End = \'#{options[:cohesive_end]}\'"
+elsif(options[:sticky_end].nil?)
+    raise OptionParser::MissingArgument,"Sticky End = \'#{options[:sticky_end]}\'"
+elsif(options[:rad_tag_file].nil?)
+    raise OptionParser::MissingArgument,"RAD Tag File = \'#{options[:rad_tag_file]}\'"
+end
 
 class AssemblyScore
     attr_accessor :name
@@ -143,7 +178,7 @@ class ContigAlignment
             i.rad_tag_align_ary.size <=> j.rad_tag_align_ary.size
         }
         msg  = " "*1+"CONTIG: NAME = #{@name}\n"
-        msg += " "*1+"-------" + "-"*@name.size + "\n"
+        msg += " "*1+"---------------" + "-"*@name.size + "\n"
         @locus_align_ary.each { |locus|
             msg += locus.to_s
         }
@@ -188,7 +223,7 @@ class AssemblyAlignment
             i.locus_align_ary.size <=> j.locus_align_ary.size
         }
         msg  = "ASSEMBLY: NAME = #{@name}\n"
-        msg += "=========" + "="*@name.size + "\n"
+        msg += "=================" + "="*@name.size + "\n"
         @contig_ary.each { |contig|
             msg += "\n" + contig.to_s
         }
@@ -200,20 +235,26 @@ end
 # DRIVER #
 ##########
 
-ce_seq = ARGV[0]
-se_seq = ARGV[1]
-rad_fasta_file = ARGV[2]
+exec_id = Integer(Time.new)
+ce_seq = options[:cohesive_end]
+se_seq = options[:sticky_end]
+rad_fasta_file = options[:rad_tag_file]
+out_dir = options[:out_dir]
+assem_score_file = "assembly_scores.#{exec_id}.txt"
+assem_align_file = "assembly_aligns.#{exec_id}.txt"
 
+puts "EXECUTION ID: #{exec_id}"
 puts "COHESIVE END SEQ: #{ce_seq}"
 puts "STICKY END SEQ: #{se_seq}"
 puts "RAD FASTA FILE: #{rad_fasta_file}"
+puts "OUTPUT DIR: #{out_dir}"
 puts "ASSEMBLY FILES: "
 
 assembly_scores = Array.new
-for i in 3..(ARGV.length - 1)
-    puts ARGV[i]
-    assembly_scores << AssemblyScore.new(ARGV[i])
-end
+ARGV.each { |assem_file|
+    puts assem_file
+    assembly_scores << AssemblyScore.new(assem_file)
+}
 puts
 
 max_tag_length = -1;
@@ -367,7 +408,7 @@ assembly_scores.sort! { |i,j|
 }
 
 puts "writing results to file system..."
-summary_file = File.open('assembly_score_summaries.txt','w')
+summary_file = File.open("#{out_dir}/#{assem_score_file}",'w')
 summary_file.print "ASSEMBLY SCORE SUMMARIES\n"
 summary_file.print "========================\n\n"
 summary_file.puts
@@ -379,7 +420,7 @@ assembly_scores.each { |a|
     summary_file.puts
 }
 summary_file.close
-alignment_file = File.open('alignment_summaries.txt','w')
+alignment_file = File.open("#{out_dir}/#{assem_align_file}",'w')
 assembly_align_ary.sort! { |i,j|
     (i.actual / i.expected) <=> (j.actual / j.expected)
 }
