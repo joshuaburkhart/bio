@@ -6,9 +6,9 @@ require 'optparse'
 options ={}
 optparse = OptionParser.new { |opts|
     opts.banner = <<-EOS
-#Usage: ruby rad_aligner.rb -c <cut site cohesive end sequence> -s <cut site sticky end sequence> -t </path/to/fasta/file/with/rad/tags> -o </path/to/output/dir> </path/to/fasta/file/with/contigs/1> [ ... </path/to/fasta/file/with/contigs/n>]
+Usage: ruby rad_aligner.rb -c <cut site cohesive end sequence> -s <cut site sticky end sequence> -t </path/to/fasta/file/with/rad/tags> -o </path/to/output/dir> </path/to/fasta/file/with/contigs/1> [ ... </path/to/fasta/file/with/contigs/n>]
 
-#Example: ruby rad_aligner.rb -c C -s CGTAG -t ~/tmp/mock_rad_tags.fasta -o ~/tmp/ ~/tmp/mock_contigs.fasta
+Example: ruby rad_aligner.rb -c C -s CGTAG -t ~/tmp/mock_rad_tags.fasta -o ~/tmp/ ~/tmp/mock_contigs.fasta
     EOS
     opts.on('-h','--help','Display this screen'){
         puts opts
@@ -200,7 +200,7 @@ class AssemblyAlignment
             @contig_ary << contig
         end
     end
-    
+
     def actual
         a = 0
         @contig_ary.each { |c|
@@ -333,37 +333,42 @@ assembly_scores.each { |a|
 
     a.rad_output.each { |line|
         if(!line.match(/^#|Reported/))
-           line_ary = line.split
-           tag_name = line_ary[0]
-           fr = line_ary[1]
-           ref_strand_name = line_ary[2]
-           offset = Integer(line_ary[3])
-           seq = line_ary[4]
-           rad_tag_align = RadTagAlignment.new(tag_name,ref_strand_name,seq,offset,fr)
-           n = Integer(%x(echo "$(cat #{a.name})>" | tr -d '\n' | grep -Po '(?<=#{ref_strand_name}).+(?=>)' | wc | awk -F' ' '{print $3}'))
-           locus_name = ref_strand_name
-           if(fr == "+")
-               x = offset - ce_seq.size
-               locus_name += "-#{x}"
-           elsif(fr == "-")
-               x = (offset + seq.size) - se_seq_size
-               locus_name += "-#{x}"
-           else
-               puts "ERROR: RAD ALIGNMENT DIRECTION '#{fr}' UNRECOGNIZABLE"
-               exit 1
-           end
+            line_ary = line.split
+            tag_name = line_ary[0]
+            fr = line_ary[1]
+            ref_strand_name = line_ary[2]
+            offset = Integer(line_ary[3])
+            seq = line_ary[4]
+            rad_tag_align = RadTagAlignment.new(tag_name,ref_strand_name,seq,offset,fr)
+            locus_name = ref_strand_name
+            if(fr == "+")
+                x = offset - ce_seq.size
+                locus_name += "-#{x}"
+            elsif(fr == "-")
+                x = (offset + seq.size) - se_seq_size
+                locus_name += "-#{x}"
+            else
+                puts "ERROR: RAD ALIGNMENT DIRECTION '#{fr}' UNRECOGNIZABLE"
+                exit 1
+            end
 
-           tmp_idx = tmp_locus_ary.index { |l| l.name == locus_name}
-           if(!tmp_idx.nil?)
-               locus_align = tmp_locus_ary[tmp_idx]
-               locus_align.addRadTagAlign(rad_tag_align)
-               locus_align.n = n
-           else
-               puts "WARNING: RAD TAG MATCHED LOCUS WITHOUT CUTSITE"
-               puts " RAD TAG: #{rad_tag_align.to_s}"
-               puts " LOCUS: #{locus_name}"
-               
-           end
+            tmp_idx = tmp_locus_ary.index { |l| l.name == locus_name}
+            if(!tmp_idx.nil?)
+                locus_align = tmp_locus_ary[tmp_idx]
+                locus_align.addRadTagAlign(rad_tag_align)
+                if(ref_strand_name.match(/length_([0-9]+)_cov/))
+                    n = Integer($1)
+                else
+                    puts "WARNING: IRREGULAR CONTIG NAME. REVERTING TO CMD LINE TOOLS FOR PARSING"
+                    n = Integer(%x(echo "$(cat #{a.name})>" | tr -d '\n' | grep -Po '(?<=#{ref_strand_name}).+(?=>)' | wc | awk -F' ' '{print $3}'))
+                end
+                locus_align.n = n
+            else
+                puts "WARNING: RAD TAG MATCHED LOCUS WITHOUT CUTSITE"
+                puts " RAD TAG: #{rad_tag_align.to_s}"
+                puts " LOCUS: #{locus_name}"
+
+            end
         end
     }
     tmp_locus_ary.each { |l|
@@ -373,8 +378,13 @@ assembly_scores.each { |a|
             end
             if(l.rad_tag_align_ary.size < l.expected)
                 if(l.n == 0)
-                    ref_strand_align = l.ref_strand_align
-                    n = Integer(%x(echo "$(cat #{a.name})>" | tr -d '\n' | grep -Po '(?<=#{ref_strand_name}).+(?=>)' | wc | awk -F' ' '{print $3}'))
+                    ref_strand_name = l.ref_strand_name
+                    if(ref_strand_name.match(/length_([0-9]+)_cov/))
+                        n = Integer($1)
+                    else
+                        puts "WARNING: IRREGULAR CONTIG NAME. REVERTING TO CMD LINE TOOLS FOR PARSING"
+                        n = Integer(%x(echo "$(cat #{a.name})>" | tr -d '\n' | grep -Po '(?<=#{ref_strand_name}).+(?=>)' | wc | awk -F' ' '{print $3}'))
+                    end
                     l.n = n
                 end
                 if(l.n - l.offset < max_tag_length)
@@ -382,9 +392,9 @@ assembly_scores.each { |a|
                 end
             end
         end
-        puts "l.offset: #{l.offset}"
-        puts "l.expected: #{l.expected}"
-        puts "l.n: #{l.n}"
+        #puts "l.offset: #{l.offset}"
+        #puts "l.expected: #{l.expected}"
+        #puts "l.n: #{l.n}"
         if(l.expected > 0)
             ref_strand_name = l.ref_strand_name
             idx = assembly_align.contig_ary.index { |c| c.name == ref_strand_name}
@@ -404,7 +414,7 @@ puts "\nsequences aligned"
 puts
 
 assembly_scores.sort! { |i,j|
-    [j.getActOvrExpAlignments,j.compareRadTags] <=> [i.getActOvrExpAlignments,i.compareRadTags]
+    [i.getActOvrExpAlignments,i.compareRadTags] <=> [j.getActOvrExpAlignments,j.compareRadTags]
 }
 
 puts "writing results to file system..."
