@@ -175,7 +175,7 @@ class ContigAlignment
     #order loci by rad_tag_align_ary size
     def to_s
         @locus_align_ary.sort! { |i,j|
-            i.rad_tag_align_ary.size <=> j.rad_tag_align_ary.size
+            j.rad_tag_align_ary.size <=> i.rad_tag_align_ary.size
         }
         msg  = " "*1+"CONTIG: NAME = #{@name}\n"
         msg += " "*1+"---------------" + "-"*@name.size + "\n"
@@ -220,7 +220,7 @@ class AssemblyAlignment
     #order contigs by locus_align_ary size
     def to_s
         @contig_ary.sort! { |i,j|
-            i.locus_align_ary.size <=> j.locus_align_ary.size
+            j.locus_align_ary.size <=> i.locus_align_ary.size
         }
         msg  = "ASSEMBLY: NAME = #{@name}\n"
         msg += "=================" + "="*@name.size + "\n"
@@ -414,7 +414,7 @@ puts "\nsequences aligned"
 puts
 
 assembly_scores.sort! { |i,j|
-    [i.getActOvrExpAlignments,i.compareRadTags] <=> [j.getActOvrExpAlignments,j.compareRadTags]
+    [j.getActOvrExpAlignments,j.compareRadTags] <=> [i.getActOvrExpAlignments,i.compareRadTags]
 }
 
 puts "writing results to file system..."
@@ -432,7 +432,7 @@ assembly_scores.each { |a|
 summary_file.close
 alignment_file = File.open("#{out_dir}/#{assem_align_file}",'w')
 assembly_align_ary.sort! { |i,j|
-    (i.actual / i.expected) <=> (j.actual / j.expected)
+    (j.actual / j.expected) <=> (i.actual / i.expected)
 }
 alignment_file.print "ALIGNMENT SUMMARIES\n"
 alignment_file.print "===================\n\n"
