@@ -312,13 +312,26 @@ assembly_scores.each { |a|
     bowtie_idx_name = Time.new.to_f.to_s.sub('.','_')
     sleep(1) #assuring a new Time
     %x(bowtie-build #{contigs_fa_file} #{bowtie_idx_name})
+    assem_dir = contigs_fa_file.strip.sub(".","_").sub("/","-")
+    assem_vid = "#{assem_dir}/#{bowtie_idx_name}" 
+    %x(mkdir #{assem_dir})
+
     a.setCutResult(%x(bowtie -a -n0 -l#{cut_seq_size} -c #{bowtie_idx_name} #{cut_seq} 2>&1))
+    %x(bowtie -a -n0 -l#{cut_seq_size} -c #{bowtie_idx_name} #{cut_seq} --sam #{assem_vid}.sam)
+    %x(samtools view -bS #{assem_vid}.sam > #{assem_vid}_cutsites.bam)
+
     a.setRadResult(%x(bowtie #{bowtie_idx_name} -n#{MAX_MISMATCHES} -l#{se_seq_size} #{BEST} -f #{rad_fasta_file} 2>&1))
+    %x(bowtie #{bowtie_idx_name} -n#{MAX_MISMATCHES} -l#{se_seq_size} #{BEST} -f #{rad_fasta_file} --sam #{assem_vid}.sam)
+    %x(samtools view -bS #{assem_vid}.sam > #{assem_vid}_radtags.bam)
+
+    %x(samtools merge #{assem_vid}_merged.bam #{assem_vid}_cutsites.bam #{assem_vid}_radtags.bam)
+    %x(samtools sort #{assem_vid}_merged.bam #{assem_vid}_merged.sorted)
+    %x(samtools index #{assem_vid}_merged.sorted.bam)
     %x(rm -f #{bowtie_idx_name}.*)
 
     assembly_align = AssemblyAlignment.new(a.name)
     tmp_locus_ary = Array.new
-    a.cut_output.each { |line|
+    a.cut_output.each_line { |line|
         if(!line.match(/^#|Reported/))
             line_ary = line.split
             fr = line_ary[1]
@@ -331,7 +344,7 @@ assembly_scores.each { |a|
         end
     }
 
-    a.rad_output.each { |line|
+    a.rad_output.each_line { |line|
         if(!line.match(/^#|Reported/))
             line_ary = line.split
             tag_name = line_ary[0]
