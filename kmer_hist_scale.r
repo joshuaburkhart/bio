@@ -48,7 +48,7 @@ cov.max = max(cov)
 ############################################################
 pdf("kmer_hist.pdf")
 hc = hist(cov, breaks=seq(0,ceiling(cov.max)), plot=F)$counts
-hist(cov, breaks=seq(0,ceiling(cov.max)), xlim=c(0, 100), ylim=c(0, round(1.2*hc[cov.mean])), xlab="Coverage", main="k-mer counts",col="blue")
+hist(cov, breaks=seq(0,ceiling(cov.max)), xlim=c(0, 100), ylim=c(0, 100), xlab="Coverage", main="k-mer counts",col="blue")
 dev.off()
 
 ############################################################
