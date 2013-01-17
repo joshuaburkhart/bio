@@ -34,7 +34,7 @@ while(ma_dataline = ma_filehandl.gets)
     b = Float(ma_dataline_ary[6])
 
     diff = minus - avg
-    sig = qvalue > 0.05
+    sig = qvalue < 0.05
 
     ma_results << DerivedDataRow.new(gene,minus,avg,diff,t,pvalue,qvalue,sig,b)
 
