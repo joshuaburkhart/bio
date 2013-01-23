@@ -1,8 +1,8 @@
 #!/usr/bin/ruby
 
-#Usage: maparser.rb <ma data file>
+#Usage: ma_splitter.rb <ma data file>
 
-#Example: maparser.rb limma.KC-WI.gene.de.txt
+#Example: ma_splitter.rb limma.KC-WI.gene.de.txt
 
 #NOTE: This program produces the three output files described below.
 #
@@ -19,7 +19,7 @@ ma_results = Array.new
 puts "reading #{ma_filename}..."
 line_count = 0
 while(ma_dataline = ma_filehandl.gets)
-    if(line_count % 10000 == 0)
+    if(line_count % 1000 == 0)
         print "."
         STDOUT.flush
     end
@@ -72,4 +72,3 @@ pos_filehandl.close
 neg_filehandl.close
 
 puts "done."
-

@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-#Usage: madiff.rb <minuend ma data file> <subtrahend ma data file>
+#Usage: ma_diff.rb <minuend ma data file> <subtrahend ma data file>
 
 #Example:
 
@@ -8,7 +8,7 @@
 #
 #~.diff.csv => difference ma data file
 
-DerivedDataRow = Struct.new(:gene,:minus,:avg,:diff,:t,:t,:pvalue,:qvalue,:sig,:b)
+DerivedDataRow = Struct.new(:gene,:minus,:avg,:diff,:t,:pvalue,:qvalue,:sig,:b)
 
 ma_minuend_filename = ARGV[0]
 ma_minuend_filehandl = File.open(ma_minuend_filename,"r")
@@ -18,7 +18,7 @@ ma_genes = Hash.new
 puts "building gene list from #{ma_minuend_filename}..."
 line_count = 0
 while(ma_minuend_dataline = ma_minuend_filehandl.gets)
-    if(line_count % 10000 == 0)
+    if(line_count % 1000 == 0)
         print "."
         STDOUT.flush
     end
@@ -46,7 +46,7 @@ ma_sbtrhnd_header = ma_sbtrhnd_filehandl.gets
 puts "filtering out genes from #{ma_sbtrhnd_filename}..."
 line_count = 0
 while(ma_sbtrhnd_dataline = ma_sbtrhnd_filehandl.gets)
-    if(line_count % 10000 == 0)
+    if(line_count % 1000 == 0)
         print "."
         STDOUT.flush
     end
@@ -73,8 +73,3 @@ ma_diff_ary.each { |i|
 
 diff_filehandl.close
 puts "done."
-
-
-
-
-
