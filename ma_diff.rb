@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-#Usage: ma_diff.rb <minuend ma data file> <subtrahend ma data file>
+#Usage: ma_diff.rb <minuend ma data file> <subtrahend ma data file> <outfile name>
 
 #Example:
 
@@ -60,8 +60,16 @@ puts
 
 ma_sbtrhnd_filehandl.close
 ma_diff_ary = ma_genes.values
-out_header = "Gene\tMinus\tAverage\tDifference\tt-value\tp-value\tq-value\tsignificant\tB"
+
+ma_diff_ary.sort! { |i,j|
+    j.minus.abs <=> i.minus.abs
+}
+
 diff_filename = "#{ma_minuend_filename}-#{ma_sbtrhnd_filename}.diff.csv"
+if(!ARGV[2].nil?)
+    diff_filename = "#{ARGV[2]}.diff.csv"
+end
+out_header = "Gene\tMinus\tAverage\tDifference\tt-value\tp-value\tq-value\tsignificant\tB"
 diff_filehandl = File.open(diff_filename,"w")
 diff_filehandl.puts(out_header)
 
