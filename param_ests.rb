@@ -9,26 +9,18 @@ DEFAULT_OUT_FILE = './estimated_parameters.txt'
 MILLION = 1000000
 G = 850 * MILLION
 CK_TEST_VALS = [20,25,30,35,40]
-ID = @unbarcoded
+PROG_INDC = ['.',':','*','~','+','@','#','%','&']
 
 optparse = OptionParser.new { |opts|
     opts.banner = <<-EOS
-Usage: jruby param_ests.rb -1 </path/to/input/file/1> -2 </path/to/input/file/2> -o </path/to/output/file>
+Usage: param_ests.rb </path/to/input/file/1> </path/to/input/file/N> -o </path/to/output/file>
 
-Example: jruby param_ests.rb -1 /home13/jburkhar/research/out/kmer_filter_output/sample1.fq -2 /home13/jburkhar/research/out/kmer_filter/output/sample2.fq -o /home13/jburkhar/research/output/stats/ests_0.txt
+Example: param_ests.rb wy_unfiltered_combined_reads-unshuf_1.cor.fastq wy_unfiltered_combined_reads-unshuf_2.cor.fastq wy_unfiltered_combined_reads-unshuf_1.cor_single.fastq wy_unfiltered_combined_reads-unshuf_2.cor_single.fastq
     EOS
 
     opts.on('-h','--help','Display this screen'){
         puts opts
         exit
-    }
-    options[:in_file1] = nil
-    opts.on('-1','--in_file1 FILE','Input File 1'){ |file_name|
-        options[:in_file1] = file_name
-    }
-    options[:in_file2] = nil
-    opts.on('-2','--in_file2 FILE','Input File 2'){ |file_name|
-        options[:in_file2] = file_name
     }
     options[:out_file] = DEFAULT_OUT_FILE
     opts.on('-o','--out_file FILE','Output File'){ |file_name|
@@ -41,23 +33,27 @@ Example: jruby param_ests.rb -1 /home13/jburkhar/research/out/kmer_filter_output
 }
 optparse.parse!
 
-puts "ARGUMENTS PASSED:"
-puts "in_file1 = #{options[:in_file1]}"
-puts "in_file2 = #{options[:in_file2]}"
-puts "out_file = #{options[:out_file]}"
-puts
-
 def parseFile(fh,pg,mutex,ch)
     Thread.current["nbp"] = 0
     Thread.current["n"] = 0
+    Thread.current["seq_id"] = nil
     progress_mon = 0
     fh_cached_line = ""
     while fh_cur_line = fh.gets
-        if fh_cached_line.match(/^#{ID}/)
+        if(Thread.current["seq_id"] == nil)
+            if(fh_cur_line.match(/^(@.+?):.*$/))
+                Thread.current["seq_id"] = $1
+            else
+                puts "UNABLE TO FIND VALID SEQUENCE ID IN FIRST LINE:"
+                puts "#{fh_cur_line}"
+                exit
+            end 
+        end
+        if fh_cached_line.match(/^#{Thread.current["seq_id"]}/)
             Thread.current["nbp"] += fh_cur_line.size
             Thread.current["n"] += 1
             progress_mon += 1
-            if progress_mon > pg
+            if(progress_mon > pg)
                 mutex.synchronize {
                     print ch
                     STDOUT.flush
@@ -72,21 +68,15 @@ end
 
 file_stats = []
 puts "working..."
-if (!options[:in_file1].nil?)
-    file_stats[0] = Thread.new {
-        pg = options[:progress]
-        fh = File.open(options[:in_file1])
-        parseFile(fh,pg,mutex,'.')
-        fh.close
-    }
-    if(!options[:in_file2].nil?)
-        file_stats[1] = Thread.new {
+if(ARGV.length > 0)
+    ARGV.each_with_index {|file,i|
+        file_stats[i] = Thread.new {
             pg = options[:progress]
-            fh = File.open(options[:in_file2])
-            parseFile(fh,pg,mutex,':')
+            fh = File.open(file)
+            parseFile(fh,pg,mutex,PROG_INDC[i % PROG_INDC.length])
             fh.close
         }
-    end
+    }
     nbp = 0
     n = 0
     file_stats.each { |t|
@@ -117,7 +107,7 @@ if (!options[:in_file1].nil?)
         outh.puts "Kmer Coverage #{ck}:"
         k = l + 1 - (Float(ck * G) / n)
         est_gbs =(-109635 + 18977 * l + 86326 * (G / MILLION) + 233353 * (n / MILLION) - 51092 * k) / 1048576
-        
+
         num_sizes = [Integer(est_gbs).to_s.size, Integer(k).to_s.size]
         max_ln = num_sizes.max
 
@@ -134,5 +124,6 @@ if (!options[:in_file1].nil?)
     puts
     puts "done."
 else
-    puts "No input file specified. Exiting..."
+    puts "No input files specified."
+    puts "Aborting..."
 end
