@@ -22,12 +22,14 @@ end
 DerivedDataRow = Struct.new(:gene,:minus,:avg,:diff,:t,:pvalue,:qvalue,:sig,:b)
 
 common_genes = Hash.new
-line_count = 0
+total_line_count = 0
+individual_line_counts = Array.new
 ARGV.each_with_index { |ma_filename,i|
+    individual_line_counts[i] = 0
     ma_filehandl = File.open(ma_filename,"r")
     ma_header = ma_filehandl.gets
     while(ma_dataline = ma_filehandl.gets)
-        if(line_count % 1000 == 0)
+        if(total_line_count % 1000 == 0)
             print "."
             STDOUT.flush
         end
@@ -48,7 +50,8 @@ ARGV.each_with_index { |ma_filename,i|
             common_genes[gene] << DerivedDataRow.new(gene,minus,avg,diff,t,pvalue,qvalue,sig,b)
             common_genes[gene].qval_tot = qvalue
         end
-        line_count += 1
+        individual_line_counts[i] += 1
+        total_line_count += 1
     end
     ma_filehandl.close
     puts
@@ -58,15 +61,19 @@ ARGV.each_with_index { |ma_filename,i|
 }
 puts "--"
 
-puts "Common genes found: #{common_genes.size}"
+puts "Unique common sequences found: #{common_genes.size}"
 common_genes_ary = common_genes.values
-puts "Intersection contains #{common_genes_ary.length}/#{line_count} ~ #{(common_genes_ary.length * 100) / Float(line_count).round}% of original genes."
+puts "Intersection contains #{2 * common_genes_ary.length}/#{total_line_count} ~ #{((2 * common_genes_ary.length * 100000) / Float(total_line_count)).round/Float(1000)}% of total sequences."
+ARGV.each_with_index {|ma_filename,i|
+    puts " #{common_genes_ary.length}/#{individual_line_counts[i]} ~ #{((common_genes_ary.length * 100000) / Float(individual_line_counts[i])).round/Float(1000)}% of sequences from #{ma_filename}."
+}
+puts
+
 common_genes_ary.sort! { |i,j| i.qval_tot <=> j.qval_tot}
 common_genes_ary.each { |sub_ary|
     sub_ary.sort! { |i,j| i.qvalue <=> j.qvalue}
 }
 common_genes_ary.flatten!
-
 
 intsct_filename = "#{ARGV.join("-")}.intsct.csv"
 intsct_filehandl = File.open(intsct_filename,"w")

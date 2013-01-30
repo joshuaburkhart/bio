@@ -67,9 +67,10 @@ def parseFile(fh,pg,mutex,ch)
 end
 
 file_stats = []
-puts "working..."
 if(ARGV.length > 0)
     ARGV.each_with_index {|file,i|
+        puts "consuming #{file}..." 
+        STDOUT.flush
         file_stats[i] = Thread.new {
             pg = options[:progress]
             fh = File.open(file)
@@ -77,6 +78,8 @@ if(ARGV.length > 0)
             fh.close
         }
     }
+    puts "working..."
+    STDOUT.flush
     nbp = 0
     n = 0
     file_stats.each { |t|
@@ -88,8 +91,9 @@ if(ARGV.length > 0)
     c = Float(nbp) / G #nucleotide coverage
     outh = File.open("#{options[:out_file]}",'w')
     outh.puts "ESTIMATED PARAMETERS FOR:"
-    outh.puts "FILE 1: #{options[:in_file1]}"
-    outh.puts "FILE 2: #{options[:in_file2]}"
+    ARGV.each_with_index {|file,i|
+        outh.puts "FILE #{i}: #{file}"
+    }
     outh.puts "========================="
     outh.puts
 
