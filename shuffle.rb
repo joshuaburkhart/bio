@@ -19,7 +19,7 @@ shuf_filehandl = File.open("#{name1}-#{name2}-shuf.fastq","w")
 unshuffled_filehandl1 = File.open(unshuffled_filename1,"r")
 unshuffled_filehandl2 = File.open(unshuffled_filename2,"r")
 while(unshuffled_file_line1 = unshuffled_filehandl1.gets)
-    if unshuffled_file_line.match(/^#{seq_id}.* 1:[NY]:.*$/)
+    if unshuffled_file_line1.match(/^#{seq_id}.* 1:[NY]:.*$/)
         shuf_filehandl.print unshuffled_file_line1 #sequence id
         shuf_filehandl.print unshuffled_filehandl1.gets #raw sequence letters
         shuf_filehandl.print unshuffled_filehandl1.gets #+
