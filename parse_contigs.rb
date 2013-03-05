@@ -1,5 +1,14 @@
 #!/usr/bin/ruby
 
+#Usage: parse_contigs.rb <filename> <lines per file>
+
+#Example:
+#
+#[jburkhar@hn1 tmp]$ echo $(($(cat contigs.fasta | wc -l) / 10))
+#4809
+#[jburkhar@hn1 tmp]$ parse_contigs.rb contigs.fasta 4809
+#[jburkhar@hn1 tmp]$ 
+
 filename = ARGV[0]
 lines_per_file = ARGV[1]
 if(filename.nil? || lines_per_file.nil?)
@@ -19,8 +28,10 @@ while(file_line = filehandl.gets)
     end
     if(count < Float(lines_per_file))
         if(file_line.match(/^(.*[0-9]+)([a-zA-Z]+)/))
-            new_file_handl.puts($1)
-            new_file_handl.puts($2)
+            title = ">#{$1}"
+            data = $2
+            new_file_handl.puts(title)
+            new_file_handl.puts(data)
            count += 1
         end
     else
