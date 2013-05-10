@@ -36,50 +36,95 @@ if(options[:file].nil?)
     raise OptionParser::MissingArgument, "file = \'#{options[:file]}\'"
 end
 
+#create comparison op
+COMP = options[:rev] ? "<" : ">"
+
 #create execution id
 EXECUTION_ID = "#{Time.now.to_f}".sub(".","-")
 
 #copy contigs file into tmp file
 %x(cp #{options[:file]} ./#{EXECUTION_ID})
 
-#sort tmp file
-def sort_file(filename,depth=0)
-    if(containsMinContigs(filename,2))
-        filename_L = "#{EXECUTION_ID}_L_#{depth}"
-        filename_R = "#{EXECUTION_ID}_R_#{depth}"
-        filehandl_L = File.open(filename_L,"w")
-        filehandl_R = File.open(filename_R,"w")
-        count = 0
-        while(nextContig = getNextContig(filename))
-            if(count % 2 == 0)
-                filehandl_L.write(nextContig)
-            else
-                filehandl_R.write(nextContig)
-            end
-        end
-        filehandl_L.close
-        filehandl_R.close
-        
-        filename_M = "#{EXECUTION_ID}_M_#{depth}"
-        merge_files(filename_L,filename_R,filename_M)
+file_count = 0;
 
-        filehandl_O = File.open(filename,"r")
-        filehandl_O.close
+def getFileCount()
+    file_count += 1
+    return file_count
+end
+
+#sort tmp file
+def sortFile(filename)
+    if(containsMinContigs(filename,2))
+        filename_L = "#{EXECUTION_ID}_L_#{getFileCount()}"
+        filename_R = "#{EXECUTION_ID}_R_#{getFileCount()}"
+        contig_counter = 0
+        while(nextContig = popTopContig(filename))
+            if(contig_counter % 2 == 0)
+                append(filename_L)
+            else
+                append(filename_R)
+            end
+            contig_counter += 1
+        end
+
+        filename_L = sortFile(filename_L,getFileCount())
+        filename_R = sortFile(filename_R,getFileCount())
+
+        return mergeFiles(filename_L,filename_R,filename_M)
     else
         return filename
     end
 end
 
-def merge_files(filename_L, filename_R, filename_M)
-    if(containsMinContigs(filename_L,1) && containsMinContigs(filename_R,1)
-
-    elsif(containsMinContigs(filename_L,1)
-
-    elsif(containsMinContigs(filename_R,1)
-
-    else
-
+def mergeFiles(filename_L, filename_R, filename_M)
+    while(containsMinContigs(filename_L,1) || containsMinContigs(filename_R,1)
+          if(containsMinContigs(filename_L,1) && containsMinContigs(filename_R,1)
+             length_L = getTopContigLength(filename_L)
+             length_R = getTopContigLength(filename_R)
+             firstContig = eval("length_L #{COMP} length_R") ? popTopContig(filename_L) : popTopContig(filename_R)
+             append(filename_M,firstContig)
+          elsif(containsMinContigs(filename_L,1)
+                append(filename_M,popTopContig(filename_L)
+          else(containsMinContigs(filename_R,1)
+               append(filename_M,popTopContig(filename_R)
+          end
     end
+    return filename_M
+end
+
+def containsMinContigs(filename, min_limit)
+    filehandl = File.open(filename,"r")
+    contig_count = 0
+    while(line = filehandl.gets && contig_count < min_limit)
+        if(line.match(/^>/)
+           contig_count += 1
+        end
+    end
+    filehandl.close
+    return contig_count >= min_limit
+end
+
+def getTopContigLength(filename)
+    filehandl = File.open(filename,"r")
+    length = 0
+    contig_label = filehandl.gets
+    if(contig_label.match(/^>/)
+        while(line = filehandl.gets && line.match(/(^[ATCGNatcgn]*\n?$)/)
+              length += line.count("ATCGNatcgn")
+        end
+    else
+        puts "wtf malformed contig label '#{contig_label}' detected"
+        exit(1)
+    end
+    return length
+end
+
+def popTopContig(filename)
+
+end
+
+def append(filename, contig)
+
 end
 
 #write sorted file to disk
