@@ -42,17 +42,26 @@ COMP = options[:rev] ? "<" : ">"
 #create execution id
 EXECUTION_ID = "#{Time.now.to_f}".sub(".","-")
 
+#create auto_incrementing var
+file_count = 0;
+
 #copy contigs file into tmp file
 %x(cp #{options[:file]} ./#{EXECUTION_ID})
 
-file_count = 0;
+#sort tmp file
+contigs_filename = options[:file]
+sorted_filename = sort(contigs_filename)
+
+#select top sel_count contigs and copy to tmp file
+sel_count = options[:sel]
+selectedContigs_filename = "#{sorted_filename}.sel_#{sel_count}"
+cpTopContigs(sorted_filename,selectedContigs_filename,sel_count)
 
 def getFileCount()
     file_count += 1
     return file_count
 end
 
-#sort tmp file
 def sortFile(filename)
     if(containsMinContigs(filename,2))
         filename_L = "#{EXECUTION_ID}_L_#{getFileCount()}"
@@ -109,24 +118,69 @@ def getTopContigLength(filename)
     length = 0
     contig_label = filehandl.gets
     if(contig_label.match(/^>/)
-        while(line = filehandl.gets && line.match(/(^[ATCGNatcgn]*\n?$)/)
-              length += line.count("ATCGNatcgn")
-        end
+       while(line = filehandl.gets && line.match(/(^[ATCGNatcgn]*\n?$)/)
+             length += line.count("ATCGNatcgn")
+       end
     else
         puts "wtf malformed contig label '#{contig_label}' detected"
         exit(1)
     end
+    filehandl.close
     return length
 end
 
 def popTopContig(filename)
-
+    cp_filename = "#{filename}.tmp"
+    filehandl = File.open(filename,"r")
+    topContig = nil
+    contig_label = filehandl.gets
+    if(contig_label.match(/^>/)
+       topContig = contig_label
+       while(line = filehandl.gets && line.match(/(^[ATCGNatcgn]*\n?$)/)
+             topContig = "#{topContig}#{line}"
+       end
+       cp_filehandl = File.open(cp_filename,"w")
+       while(line = filehandl.gets)
+           cp_filehandl.puts(line)
+       end
+       filehandl.close
+       cp_filehandl.close
+       File.delete(filename)
+       File.rename(cp_filename,filename)
+    else
+        filehandl.close
+        puts "wtf malformed contig label '#{contig_label}' detected"
+        exit(1)
+    end
+    return topContig
 end
 
 def append(filename, contig)
-
+    filehandl = File.open(filename,"a")
+    filehandl.puts(contig)
+    filehandl.close
 end
 
-#write sorted file to disk
+def cpTopContigs(filename,cp_filename,lim)
+    filehandl = File.open(filename,"r")
+    count = 0
+    while(count < lim)
+        contig_label = filehandl.gets
+        if(contig_label.match(/^>/)
+           contig = contig_label
+           while(line = filehandl.gets && line.match(/(^[ATCGNatcgn]*\n?$)/)
+                 contig = "#{topContig}#{line}"
+           end
+           cp_filehandl = File.open(cp_filename,"w")
+           cp_filehandl.puts(contig)
+           cp_filehandl.close
+        else
+            filehandl.close
+            puts "wtf malformed contig label '#{contig_label}' detected"
+            exit(1)
+        end
+    end
+    filehandl.close
+end
 
-#select top sel_count contigs and copy to tmp file
+
