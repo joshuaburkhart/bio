@@ -55,3 +55,4 @@ sorted_filename = sorter.sort()
 sel_count = options[:sel]
 selectedContigs_filename = "#{sorted_filename}.sel_#{sel_count}"
 sorter.cpTopContigs(sorted_filename,selectedContigs_filename,sel_count)
+
