@@ -9,7 +9,7 @@ class ContigSorter
     end
 
     def sort()
-        sort(contigs_filename)
+        sortFile(@contigs_filename)
     end
 
     def getFileCount()

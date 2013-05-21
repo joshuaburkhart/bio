@@ -16,16 +16,16 @@ Example: sort_contigs.rb -f /home13/jburkhar/tmp/test1.fasta
         puts opts
         exit
     }
-    options[:file]
-    opts.on('-f','--file','The contigs file in fasta format'){ |file|
+    options[:file] = nil
+    opts.on('-f','--file FILE','The contigs file in fasta format FILE'){ |file|
         options[:file] = file
     }
-    options[:rev]
+    options[:rev] = false
     opts.on('-r','--reverse','Sort in reverse order (shortest contigs first)'){
         options[:rev] = true
     }
-    options[:sel_count]
-    opts.on('-s','--sel_count','Select number of front contigs to be copied into separete file'){ |sel_count|
+    options[:sel_count] = nil
+    opts.on('-s','--sel_count COUNT','Select number of front contigs to be copied into separete file COUNT'){ |sel_count|
         options[:sel_count]
     }
 }
@@ -35,17 +35,22 @@ optparse.parse!
 if(options[:file].nil?)
     puts "Contigs file must be specified"
     raise OptionParser::MissingArgument, "file = \'#{options[:file]}\'"
+else
+    puts "params:"
+    puts "file = '#{options[:file]}'"
+    puts "rev = '#{options[:rev]}'"
+    puts "sel_count = '#{options[:sel_count]}'"
 end
 
 #create comparison op
-COMP = options[:rev] ? "<" : ">"
+COMP = options[:rev] ? 0 : 1
 
 #create execution id
 EXECUTION_ID = "#{Time.now.to_f}".sub(".","-")
 
 #copy contigs file into tmp file
-DIR = "./"
-%x(cp #{options[:file]} #{DIR}#{EXECUTION_ID})
+DIR = "/home11/mmiller/Wyeomyia/output/queue_out"
+%x(cp #{options[:file]} #{DIR}/#{EXECUTION_ID})
 
 #sort tmp file
 sorter = ContigSorter.new(COMP,EXECUTION_ID,DIR)
