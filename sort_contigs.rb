@@ -28,6 +28,10 @@ Example: sort_contigs.rb -f /home13/jburkhar/tmp/test1.fasta
     opts.on('-s','--sel_count COUNT','Select number of front contigs to be copied into separete file COUNT'){ |sel_count|
         options[:sel_count]
     }
+    options[:out_dir] = "/home11/mmiller/Wyeomyia/output/queue_out"
+    opts.on('-o','--out_dir DIR','Output file DIR'){ |dir|
+        options[:out_dir] = file
+    }
 }
 
 optparse.parse!
@@ -49,7 +53,7 @@ COMP = options[:rev] ? 0 : 1
 EXECUTION_ID = "#{Time.now.to_f}".sub(".","-")
 
 #copy contigs file into tmp file
-DIR = "/home11/mmiller/Wyeomyia/output/queue_out"
+DIR = options[:out_dir]
 %x(cp #{options[:file]} #{DIR}/#{EXECUTION_ID})
 
 #sort tmp file
