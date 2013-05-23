@@ -5,34 +5,46 @@ out_dir = "\
 "
 
 orig_contigs_file = "\
-/home11/mmiller/Wyeomyia/output/velvet_out/velvet-wy_unfiltered_combined_reads_diginorm_paired.fastq.keep_k\=31_e\    =19/contigs.fa \
+/home11/mmiller/Wyeomyia/output/velvet_out/velvet-wy_unfiltered_combined_reads_diginorm_paired.fastq.keep_k\=31_e\=19/contigs.fa\
 "
+
+puts orig_contigs_file
+
+loc_dir = "\
+/scratch/$USER/\\$PBS_JOBID/\
+"
+
+puts loc_dir
 
 loc_contigs_file = "\
-/scratch/$USER/\\$PBS_JOBID/contigs.fa \
+#{loc_dir}/contigs.fa\
 "
+
+puts loc_contigs_file
 
 dir_setup = "\
-mkdir -p /scratch/$USER/\\$PBS_JOBID && \
-cp #{orig_contigs_file} #{loc_contigs_file} \
+mkdir -p #{loc_dir} && \
+cp #{orig_contigs_file} #{loc_contigs_file}\
 "
 
+puts dir_setup
+
 dir_teardown = "\
-rm -f #{loc_contigs_file} \
+rm -f #{loc_contigs_file}\
 "
 
 modules = "\
-ruby \
+ruby\
 "
 
 prog = "\
-ruby /home13/jburkhar/software_projects/bio/sort_contigs.rb \
+ruby /home13/jburkhar/software_projects/bio/sort_contigs.rb\
 "
 
 args = "\
--f #{loc_contigs_file} \
--s 5 \
--o /jburkhar/scratch \
+ -f #{loc_contigs_file}\
+ -s 5\
+ -o #{loc_dir}\
 "
 print "Locating capable node..."
 avail_nodes = []
@@ -54,17 +66,17 @@ end
 puts
 
 submit_args = "\
--m #{modules} \
--q longfat \
--n #{avail_nodes[selected_node]} \
-\" \
-#{dir_setup} \
-&& \
-#{prog} \
-#{args} \
-&& \
-#{dir_teardown} \
-\" \
+ -m #{modules}\
+ -q longfat\
+ -n #{avail_nodes[selected_node]}\
+ \"\
+ #{dir_setup}\
+ &&\
+ #{prog}\
+ #{args}\
+ &&\
+ #{dir_teardown}\
+ \"\
 "
 
 stdout = %x(qsubmit.rb #{submit_args})

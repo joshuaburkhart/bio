@@ -30,7 +30,7 @@ Example: sort_contigs.rb -f /home13/jburkhar/tmp/test1.fasta
     }
     options[:out_dir] = "/home11/mmiller/Wyeomyia/output/queue_out"
     opts.on('-o','--out_dir DIR','Output file DIR'){ |dir|
-        options[:out_dir] = file
+        options[:out_dir] = dir
     }
 }
 
