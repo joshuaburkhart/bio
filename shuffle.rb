@@ -7,11 +7,18 @@
 unshuffled_filename1 = ARGV[0]
 unshuffled_filename2 = ARGV[1]
 seq_id = ARGV[2]
-unshuffled_filename1.match(/^(.*\w+)\.\w+$/)
-name1 = $1
-unshuffled_filename2.match(/^(.*\w+)\.\w+$/)
-name2 = $1
-shuf_filehandl = File.open("#{name1}-#{name2}-shuf.fastq","w")
+unshuffled_filename1.match(/^(.*\/)(\w+?)\.\w+$/)
+dir1 = $1
+name1 = $2
+unshuffled_filename2.match(/^(.*\/)(\w+?)\.\w+$/)
+dir2 = $1
+name2 = $2
+if(dir1 == dir2)
+    shuf_filehandl = File.open("#{dir1}#{name1}-#{name2}-shuf.fastq","w")
+else
+    puts "directories must match..."
+    exit(1)
+end
 
 #TODO
 #filter paired reads with Y indicators (low quality indicators)
