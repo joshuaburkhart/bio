@@ -70,9 +70,6 @@ ARGV.each_with_index {|ma_filename,i|
 puts
 
 common_genes_ary.sort! { |i,j| i.qval_tot <=> j.qval_tot}
-common_genes_ary.each { |sub_ary|
-    sub_ary.sort! { |i,j| i.qvalue <=> j.qvalue}
-}
 common_genes_ary.flatten!
 
 intsct_filename = "#{ARGV.join("-")}.intsct.csv"
