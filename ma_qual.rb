@@ -13,7 +13,7 @@ Q_LIM_DEFAULT = 0.05
 
 ma_filename = ARGV[0]
 if(ARGV.size >= 2)
-    q_lim = ARGV[1]
+    q_lim = Float(ARGV[1])
     if(ARGV.size >= 3)
         keep_low_quals = ARGV[2]
     else
