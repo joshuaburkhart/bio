@@ -17,7 +17,7 @@ if(ARGV.size >= 2)
     if(ARGV.size >= 3)
         keep_low_quals = ARGV[2]
     else
-        keep_low_quals = false
+        keep_low_quals = "false"
     end
 else
     qlim = Q_LIM_DEFAULT
@@ -66,7 +66,7 @@ qual_filehandl.puts(out_header)
 
 puts "writing results..."
 ma_results.each { |i|
-    if(i.sig == true || i.sig != keep_low_quals)
+    if(i.sig == true || "#{i.sig}" != keep_low_quals)
         pretty_string = "#{i.gene}\t#{i.minus}\t#{i.avg}\t#{i.diff}\t#{i.t}\t#{i.pvalue}\t#{i.qvalue}\t#{i.sig}\t#{i.b}"
         qual_filehandl.puts(pretty_string)
     end
