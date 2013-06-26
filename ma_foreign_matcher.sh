@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#Usage: ma_foreign_matcher.sh <ma_intersect file> <foreign file indexed by gene>
+#Usage: ma_foreign_matcher.sh <file with genes of interest> <foreign file indexed by gene>
 
-#Example: ma_foreign_matcher.sh KC-WI.txt.pos.csv-WI-WIOB.txt.neg.csv.intsct.csv contig_summaries.csv
+#Example: ma_foreign_matcher.sh WI-WIOB.minus-KC-WI.minus.combined.manhattan.neg.genes contig_summaries.csv
 
 TMP=$(date | tr ' ' '-')
 cat $1 | while read LINE
