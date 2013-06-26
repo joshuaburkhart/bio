@@ -15,7 +15,7 @@ while(line = inhandl.gets)
     y = Float(line.split(/ /)[1])
     if(x > 0 && y > 0 && x + y > threshold)
         pos_outhandl.puts("#{x} #{y}")
-    elsif(x < 0 && y < 0 && x + y < threshold)
+    elsif(x < 0 && y < 0 && x + y < (-1 * threshold))
         neg_outhandl.puts("#{x} #{y}")
     end
 end
