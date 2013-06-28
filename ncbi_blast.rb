@@ -21,8 +21,6 @@ TEST_SEQ = "cagattaaagatctgctggtgagcagcagcaccgatctggataccaccctggtgctggtgaacgcgat
 
 
 def put(seq_name,seq)
-    seq_count = 1
-    puts "Performing query with sequence #{seq_count}..."
     put_params = {
         :QUERY => seq,
         :DATABASE => "nr",
@@ -132,10 +130,12 @@ else
     fh = File.open(ARGV[0],"r")
     seq_name = nil
     seq = ""
+    seq_count = 0
     while(line = fh.gets)
         if(line.match(/^>(\w*)/))
             next_seq_name = $1
             if(seq_name)
+                puts "Performing query with sequence #{seq_count}..."
                 res = put(seq_name,seq)
                 if(res)
                     get(TEXT,res)
@@ -143,6 +143,7 @@ else
             end
             seq_name = next_seq_name
             seq = ""
+            seq_count += 1
         else
             seq += line.strip
         end
