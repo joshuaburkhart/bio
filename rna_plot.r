@@ -1,7 +1,5 @@
-A = read.table("WI-WIOB.minus-KC-WI.minus.combined")
+A = read.table("WI-WIOB.log2foldChange-KC-WI.log2foldChange.combined")
 plot(A,xlab="Expression Increased in Vicious Biters               Expression Increased in Weak Biters",cex.lab=0.7,ylab="Expression Decreased in Non-Biters               Expression Increased in Non-Biters",main="WI-WIOB vs KC-WI log2 Fold Change Comparison Q < 0.4",col="dark blue")
-points(N,pch=16,col="red")
-points(P,pch=16,col="green")
 abline(a=0,b=0)
 abline(v=0)
 grid()
