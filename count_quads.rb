@@ -9,9 +9,23 @@ q1 = 0
 q2 = 0
 q3 = 0
 q4 = 0
+def convert(val)
+    num = nil
+if(val == "Inf")
+        num = 1.0/0
+    elsif(val == "-Inf")
+        num = -1.0/0
+    elsif(val == "NA")
+        num = 0.0
+    else
+        num = Float(val)
+    end
+return num
+end
+
 while(line = fh.gets)
-    x = Float(line.split(/\s/)[0])
-    y = Float(line.split(/\s/)[1])
+    x = convert(line.split(/\s/)[0])
+    y = convert(line.split(/\s/)[1])
     if(x > 0 && y > 0)
         q1 += 1
     elsif(x < 0 && y > 0)
