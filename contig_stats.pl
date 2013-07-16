@@ -56,7 +56,7 @@ my $toprint = "";
 # print header of table
 $toprint .= "Filename${delim}Max contig length";
 foreach (@thresholds) {
-    $toprint .= "${delim}Num contigs >$_${delim}Total bases in contigs >$_${delim}N50 for contigs >$_${delim}Contigs >${_} in N50${delim}GC contigs >$_${delim}nonATGC in contigs >$_${delim}Mean length for contigs >$_";
+    $toprint .= "${delim}Num contigs >$_${delim}Total bases in contigs >$_${delim}N50 length for contigs >$_${delim}Contigs >${_} in N50${delim}GC contigs >$_${delim}nonATGC in contigs >$_${delim}Mean length for contigs >$_";
 }
 $toprint .= "\n";
 
