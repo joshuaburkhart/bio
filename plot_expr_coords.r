@@ -30,12 +30,13 @@ count_quads <- function(T){
 
 add_points <- function(P){
     rng = length(P)
-    col_vector = heat.colors(rng,alpha=1)
+    col_vector = rev(heat.colors(rng,alpha=1))
     for(i in 1:length(P)){
         addnl_points = read.table(P[i])
-        col_val = col_vector[rng + 1 - i]
-        points(addnl_points,pch=16,col=col_val)
+        col_val = col_vector[i]
+        points(addnl_points,col=col_val,pch=16)
     }
+    legend("right",c(P),col=col_vector,pch=16,bg="white")
 }
 
 args <- commandArgs(trailingOnly=TRUE)
@@ -44,14 +45,15 @@ print(paste("Accepting coordinate file: ",args))
 initial_points = read.table(args[1])
 plot(initial_points,xlab="Expression Increased in Vicious Biters                       Expression Increased in Weak Biters",cex.lab=0.7,ylab="Expression Decreased in Non-Biters                       Expression Increased in Non-Biters",main="WI-WIOB vs KC-WI Sequence Expression",col="black")
 
+abline(a=0,b=0)
+abline(v=0)
+grid()
+
 if(length(args) > 1){
     add_points(tail(args,-1))
 }
 
-abline(a=0,b=0)
-abline(v=0)
 
-grid()
 
 q_counts = count_quads(initial_points)
 
