@@ -42,7 +42,7 @@ args <- commandArgs(trailingOnly=TRUE)
 print(paste("Accepting coordinate file: ",args))
 
 initial_points = read.table(args[1])
-plot(initial_points,xlab="Expression Increased in Vicious Biters                       Expression Increased in Weak Biters",cex.lab=0.7,ylab="Expression Decreased in Non-Biters                       Expression Increased in Non-Biters",main="WI-WIOB vs KC-WI Minus Value Comparison",col="black")
+plot(initial_points,xlab="Expression Increased in Vicious Biters                       Expression Increased in Weak Biters",cex.lab=0.7,ylab="Expression Decreased in Non-Biters                       Expression Increased in Non-Biters",main="WI-WIOB vs KC-WI Sequence Expression",col="black")
 
 if(length(args) > 1){
     add_points(tail(args,-1))
