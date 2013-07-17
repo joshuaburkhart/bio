@@ -74,8 +74,8 @@ common_genes_ary.flatten!
 
 intsct_filename = "#{ARGV.join("-")}.intsct.csv"
 intsct_filehandl = File.open(intsct_filename,"w")
-intsct_header = "Gene\tMinus\tAverage\tDifference\tt-value\tp-value\tq-value\tsignificant\tB"
-intsct_filehandl.puts(intsct_header)
+#intsct_header = "Gene\tMinus\tAverage\tDifference\tt-value\tp-value\tq-value\tsignificant\tB"
+#intsct_filehandl.puts(intsct_header)
 
 puts "writing results to #{intsct_filename}..."
 common_genes_ary.each { |i|
