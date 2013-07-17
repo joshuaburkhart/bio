@@ -8,7 +8,7 @@
 #
 #~.intsct.csv => intersect rna seq data file
 
-QVAL = 0.4
+QVAL = 0.075
 
 class Array
     attr_accessor :qval_tot
@@ -82,8 +82,8 @@ common_id_ary.flatten!
 
 intsct_filename = "#{ARGV.join("-")}.intsct.csv"
 intsct_filehandl = File.open(intsct_filename,"w")
-intsct_header = "nolab\tid\tbaseMean\tBaseMeanA\tBaseMeanB\tfoldChange\tlog2foldChange\tpval\tqval"
-intsct_filehandl.puts(intsct_header)
+#intsct_header = "nolab\tid\tbaseMean\tBaseMeanA\tBaseMeanB\tfoldChange\tlog2foldChange\tpval\tqval"
+#intsct_filehandl.puts(intsct_header)
 
 puts "writing results to #{intsct_filename}..."
 common_id_ary.each { |i|
