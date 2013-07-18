@@ -7,8 +7,8 @@ infile = ARGV[0]
 threshold = Float(ARGV[1])
 
 inhandl = File.open(infile,"r")
-pos_outhandl = File.open("#{infile}.manhattan.pos","w")
-neg_outhandl = File.open("#{infile}.manhattan.neg","w")
+pos_outhandl = File.open("Manhattan>#{threshold}","w")
+neg_outhandl = File.open("Manhattan<#{threshold}","w")
 
 while(line = inhandl.gets)
     x = Float(line.split(/ /)[0])
