@@ -21,6 +21,7 @@ TEST_SEQ = "cagattaaagatctgctggtgagcagcagcaccgatctggataccaccctggtgctggtgaacgcgat
 
 
 def put(seq_name,seq)
+    sleep(3)
     put_params = {
         :QUERY => seq,
         :DATABASE => "nr",
@@ -46,11 +47,16 @@ def put(seq_name,seq)
         end
         put_result.body().match(/RID = ([0-9A-Z-]+)/)
         rid = $1
-        puts "RID: '#{rid}'"
-        put_result.body().match(/RTOE = ([0-9]+)/)
-        rtoe = $1
-        puts "Estimated Request Execution Time: '#{rtoe}' seconds"
-        return Put_Res.new(rid,seq_name)
+        if(!rid)
+            puts "ERROR, RID not found in result body: '#{put_result.body()}'"
+            exit
+        else
+            puts "RID: '#{rid}'"
+            put_result.body().match(/RTOE = ([0-9]+)/)
+            rtoe = $1
+            puts "Estimated Request Execution Time: '#{rtoe}' seconds"
+            return Put_Res.new(rid,seq_name)
+        end
     else
         puts "UNKOWN ERROR OCCURRED FOLLOWING PUT"
         if(DEBUG)
@@ -122,7 +128,6 @@ def get(format,res)
     end
 end
 
-res = nil
 if(TESTING)
     res = put(TEST_SEQ_NAME,TEST_SEQ)
     get(TEXT,res)
@@ -131,15 +136,13 @@ else
     seq_name = nil
     seq = ""
     seq_count = 0
+    res_ary = Array.new
     while(line = fh.gets)
         if(line.match(/^>(\w*)/))
             next_seq_name = $1
             if(seq_name)
-                puts "Performing query with sequence #{seq_count}..."
-                res = put(seq_name,seq)
-                if(res)
-                    get(TEXT,res)
-                end
+                puts "Submitting query with sequence #{seq_count}..."
+                res_ary << put(seq_name,seq)
             end
             seq_name = next_seq_name
             seq = ""
@@ -148,5 +151,11 @@ else
             seq += line.strip
         end
     end
+    res_ary.each{ |res|
+        if(res)
+            puts "Getting results for #{res.seq_name}..."
+            get(TEXT,res)
+        end
+    }
     fh.close
 end
