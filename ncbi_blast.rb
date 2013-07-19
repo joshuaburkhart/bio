@@ -6,6 +6,7 @@
 
 require 'net/http'
 
+MIN_SEQ_LEN = 20 #blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=ProgSelectionGuide
 TESTING = false
 DEBUG = false
 NCBI_URI = URI('http://www.ncbi.nlm.nih.gov/blast/Blast.cgi')
@@ -21,7 +22,6 @@ TEST_SEQ = "cagattaaagatctgctggtgagcagcagcaccgatctggataccaccctggtgctggtgaacgcgat
 
 
 def put(seq_name,seq)
-    sleep(3)
     put_params = {
         :QUERY => seq,
         :DATABASE => "nr",
@@ -36,10 +36,10 @@ def put(seq_name,seq)
         :PAGE => "Nucleotides",
         :CMD => "Put", 
     }
-    NCBI_URI.query = URI.encode_www_form(put_params)
-    put_result = Net::HTTP.get_response(NCBI_URI)
-
-    if(put_result.body().match(/RID/))
+    put_result = nil
+    begin
+        NCBI_URI.query = URI.encode_www_form(put_params)
+        put_result = Net::HTTP.get_response(NCBI_URI)
         if(DEBUG)
             fh = File.open("#{seq_name}.PUT_SUCCESS.html","w")
             fh.puts put_result.body()
@@ -47,25 +47,17 @@ def put(seq_name,seq)
         end
         put_result.body().match(/RID = ([0-9A-Z-]+)/)
         rid = $1
-        if(!rid)
-            puts "ERROR, RID not found in result body: '#{put_result.body()}'"
-            exit
-        else
+        if(rid)
             puts "RID: '#{rid}'"
             put_result.body().match(/RTOE = ([0-9]+)/)
             rtoe = $1
             puts "Estimated Request Execution Time: '#{rtoe}' seconds"
             return Put_Res.new(rid,seq_name)
+        else
+            puts "RID not returned. Retrying..."
+            sleep(3)
         end
-    else
-        puts "UNKOWN ERROR OCCURRED FOLLOWING PUT"
-        if(DEBUG)
-            fh = File.open("#{seq_name}.PUT_ERROR.html","w")
-            fh.puts put_result.body()
-            fh.close
-        end
-    end
-    return nil
+    end while(!put_result.body().match(/RID = [0-9A-Z-]+/))
 end
 
 
@@ -142,7 +134,11 @@ else
             next_seq_name = $1
             if(seq_name)
                 puts "Submitting query with sequence #{seq_count}..."
-                res_ary << put(seq_name,seq)
+                if(seq.length >= MIN_SEQ_LEN)
+                    puts "seq_name: #{seq_name}"
+                    puts "seq: #{seq}"
+                    res_ary << put(seq_name,seq)
+                end
             end
             seq_name = next_seq_name
             seq = ""
