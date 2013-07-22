@@ -146,12 +146,15 @@ else
         else
             seq += line.strip
         end
-    end
-    res_ary.each{ |res|
-        if(res)
-            puts "Getting results for #{res.seq_name}..."
-            get(TEXT,res)
+        if(seq_count % 100 == 0)
+            res_ary.each{ |res|
+                if(res)
+                    puts "Getting results for #{res.seq_name}..."
+                    get(TEXT,res)
+                end
+            }
+            res_ary.clear
         end
-    }
+    end
     fh.close
 end
