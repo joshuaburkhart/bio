@@ -56,9 +56,9 @@ add_points <- function(P){
     for(i in 1:length(P)){
         addnl_points = read.table(P[i])
         col_val = col_vector[i]
-        points(addnl_points,col=col_val,pch=16)
+        points(addnl_points,pch=21,bg=col_val,col="black")
     }
-    legend("right",c(P),col=col_vector,pch=16,bg="white")
+    legend(.4,-.75,c(P),pch=21,pt.bg=col_vector,col="black",bg="white")
 }
 
 args <- commandArgs(trailingOnly=TRUE)
