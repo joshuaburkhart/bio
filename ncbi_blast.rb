@@ -11,7 +11,7 @@ TESTING = false
 DEBUG = false
 NCBI_URI = URI('http://www.ncbi.nlm.nih.gov/blast/Blast.cgi')
 BLAST_PG = "tblastx"
-Put_Res = Struct.new(:rid,:seq_name)
+Put_Res = Struct.new(:rid,:seq_name,:seq,:seq_count)
 Format = Struct.new(:web_req_format,:file_suffix)
 HTML = Format.new("HTML","html")
 TEXT = Format.new("Text","txt")
@@ -21,7 +21,7 @@ TEST_SEQ = "cagattaaagatctgctggtgagcagcagcaccgatctggataccaccctggtgctggtgaacgcgat
 
 
 
-def put(seq_name,seq)
+def put(seq_name,seq,seq_count)
     put_params = {
         :QUERY => seq,
         :DATABASE => "nr",
@@ -52,7 +52,7 @@ def put(seq_name,seq)
             put_result.body().match(/RTOE = ([0-9]+)/)
             rtoe = $1
             puts "Estimated Request Execution Time: '#{rtoe}' seconds"
-            return Put_Res.new(rid,seq_name)
+            return Put_Res.new(rid,seq_name,seq,seq_count)
         else
             puts "RID not returned. Retrying..."
             sleep(3)
@@ -76,7 +76,7 @@ def get(format,res)
     NCBI_URI.query = URI.encode_www_form(get_params)
     get_res_body = nil
 
-    act_sec = 0
+    start_t = Time.now
     begin
         get_result = Net::HTTP.get_response(NCBI_URI)
         if(DEBUG)
@@ -84,16 +84,16 @@ def get(format,res)
             fh.puts get_result.body()
             fh.close
         end
-        sleep(3)
-        print "..."
+        print "."
         STDOUT.flush
-        act_sec += 3
         get_res_body = get_result.body()
+        sleep(1)
     end while(get_res_body.match(/Status=WAITING/))
+    end_t = Time.now
 
     puts
     if(get_result.body().match(/Status=READY/))
-        puts "Results completed after #{act_sec} seconds"
+        puts "Results completed after #{end_t - start_t} seconds"
         fn = "#{res.seq_name}.#{BLAST_PG}.#{format.file_suffix}"
         puts "Writing results to #{fn}..."
         fh = File.open(fn,"w")
@@ -133,11 +133,11 @@ else
         if(line.match(/^>(\w*)/))
             next_seq_name = $1
             if(seq_name)
-                puts "Submitting query with sequence #{seq_count}..."
+                puts "Submitting query for sequence #{seq_count}..."
                 if(seq.length >= MIN_SEQ_LEN)
                     puts "seq_name: #{seq_name}"
                     puts "seq: #{seq}"
-                    res_ary << put(seq_name,seq)
+                    res_ary << put(seq_name,seq,seq_count)
                 end
             end
             seq_name = next_seq_name
@@ -149,12 +149,26 @@ else
         if(seq_count % 100 == 0)
             res_ary.each{ |res|
                 if(res)
-                    puts "Getting results for #{res.seq_name}..."
-                    get(TEXT,res)
+                    puts "Getting results for sequence #{res.seq_count}..."
+                    attempts = 0
+                    begin
+                        get(TEXT,res)
+                    rescue Errno::ECONNRESET => e
+                        attempts += 1
+                        if(attempts < 10)
+                            puts "Connection Reset. Waiting for retry..."
+                            sleep(30)
+                            res = put(res.seq_name,res.seq)
+                            retry
+                        else
+                            puts "Unable to get results for #{res}."
+                        end
+                    end
                 end
             }
             res_ary.clear
         end
     end
     fh.close
+    puts "done."
 end
