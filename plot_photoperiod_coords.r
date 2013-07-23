@@ -58,7 +58,7 @@ add_points <- function(P){
         col_val = col_vector[i]
         points(addnl_points,pch=21,bg=col_val,col="black")
     }
-    legend(.4,-.75,c(P),pch=21,pt.bg=col_vector,col="black",bg="white")
+    legend(-4,-.75,c(P),pch=21,pt.bg=col_vector,col="black",bg="white")
 }
 
 args <- commandArgs(trailingOnly=TRUE)
@@ -67,7 +67,7 @@ print(paste("Accepting coordinate file: ",args))
 initial_points = read.table(args[1])
 maxs = findMaxs(args)
 mins = findMins(args)
-plot(initial_points,xlim=c(mins[1],maxs[1]),ylim=c(mins[2],maxs[2]),xlab="Expression Increased in PBSD22                       Expression Increased in PBSD10",cex.lab=0.7,ylab="Expression Increased in KCSD22                       Expression Increased in KCSD10",main="KCSD vs PBSD Sequence Expression",col="black")
+plot(initial_points,xlim=c(mins[1],maxs[1]),ylim=c(mins[2],maxs[2]),xlab="Expression Increased in PBSD10                       Expression Increased in PBLD10",cex.lab=0.7,ylab="Expression Increased in KCSD10                       Expression Increased in KCLD10",main="KCSD vs PBSD Sequence Expression",col="black")
 
 abline(a=0,b=0)
 abline(v=0)

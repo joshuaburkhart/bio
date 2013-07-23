@@ -7,6 +7,6 @@ while read line
 do
     VAL=$line
     echo "-1 * $VAL" | bc >> $OUT_COORD_FILE
-    echo .
+    echo -n .
 done < $IN_COORD_FILE
 echo done.
