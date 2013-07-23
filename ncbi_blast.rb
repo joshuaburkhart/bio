@@ -163,6 +163,16 @@ else
                         else
                             puts "Unable to get results for #{res}."
                         end
+                    rescue Timeout::Error => t
+                        attempts += 1
+                        if(attempts < 10)
+                            puts "Timeout Error. Waiting for retry..."
+                            sleep(30)
+                            res = put(res.seq_name,res.seq)
+                            retry
+                        else
+                            puts "Unable to get results for #{res}."
+                        end
                     end
                 end
             }
