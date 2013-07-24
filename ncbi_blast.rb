@@ -158,7 +158,7 @@ else
                         if(attempts < 10)
                             puts "Connection Reset. Waiting for retry..."
                             sleep(30)
-                            res = put(res.seq_name,res.seq)
+                            res = put(res.seq_name,res.seq,res.seq_count)
                             retry
                         else
                             puts "Unable to get results for #{res}."

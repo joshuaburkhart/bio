@@ -9,7 +9,8 @@ SUB_SET=$2 #filter these lines out
 RESULT=$SUPER_SET.unique
 rm -f $FILTERED_GENES #clear file if it exists
 FILTERED_GENES=$SUPER_SET.genes
-grep -vf $SUB_SET $SUPER_SET > $FILTERED_GENES
+LC_ALL=C
+fgrep -vf $SUB_SET $SUPER_SET > $FILTERED_GENES
 while read line
 do
     VAL=$(echo $line | awk -F' ' '{print $2}')
