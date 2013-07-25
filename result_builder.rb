@@ -12,6 +12,8 @@ cfgFileName = ARGV[0]
 plotterFileName = ARGV[1]
 
 cfgData = YAML.load_file(cfgFileName)
+experiment = cfgData['experiment']
+
 xFileName = cfgData['xfile']['name']
 yFileName = cfgData['yfile']['name']
 
@@ -56,9 +58,10 @@ if(cfgData['yfile']['reverse'] == 'true')
     yCoords = "#{yCoords}.reverse"
 end
 
+combinedCoords = "#{xCoords}-#{yCoords}.combined"
+
 puts "Combine values..."
 %x(ma_coord_combiner.rb #{xCoords} #{yCoords})
-
 
 puts "Write plotter for +/- sequences..."
 plotterRenderer = ERB.new(File.read(plotterFileName))
@@ -67,11 +70,9 @@ intsctPlotterHandl = File.open(intsctPlotter,"w")
 intsctPlotterHandl.puts(plotterRenderer.result())
 intsctPlotterHandl.close()
 
-combinedCoords = "#{xCoords}-#{yCoords}.combined"
-
 puts "Produce plot for +/- sequences..."
 %x(Rscript #{intsctPlotter} #{combinedCoords})
-%x(mv Rplots.pdf intsct_plot.pdf)
+%x(mv Rplots.pdf intersect_only_plot.pdf)
 
 puts "Filter sequences uniquely expressed in each assay..."
 %x(filter_unique.sh #{xFileStripped} #{intsct})
@@ -99,10 +100,11 @@ puts "Produce plot for +/0 sequences..."
 %x(mv Rplots.pdf intersect_and_unique_plot.pdf)
 
 puts "Move plots and data into separate directory..."
-%x(mkdir -p results)
-%x(mv #{combinedCoords} results/)
-%x(mv #{xFileCoordsZs} results/)
-%x(mv #{yFileCoordsZs} results/)
-%x(mv *.pdf results/)
+%x(mkdir -p #{experiment})
+%x(mv #{combinedCoords} #{experiment}/)
+%x(mv #{xFileCoordsZs} #{experiment}/)
+%x(mv #{yFileCoordsZs} #{experiment}/)
+%x(mv *.pdf #{experiment}/)
+%x(mv *.R #{experiment}/)
 
 puts "done."
