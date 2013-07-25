@@ -48,12 +48,14 @@ puts "Extract values used for coordinates..."
 xCoords = "#{intsct}.odd_coords"
 yCoords = "#{intsct}.even_coords"
 
-if(cfgData['xfile']['reverse'] == 'true')
+if(cfgData['xfile']['reverse'])
+    puts "Reversing x values..."
     %x(reverse_vals.sh #{xCoords})
     xCoords = "#{xCoords}.reverse"
 end
 
-if(cfgData['yfile']['reverse'] == 'true')
+if(cfgData['yfile']['reverse'])
+    puts "Reversing y values..."
     %x(reverse_vals.sh #{yCoords})
     yCoords = "#{yCoords}.reverse"
 end
@@ -65,13 +67,13 @@ puts "Combine values..."
 
 puts "Write plotter for +/- sequences..."
 plotterRenderer = ERB.new(File.read(plotterFileName))
-intsctPlotter = "plot_#{xFileName}-#{yFileName}_intersect_only.R"
-intsctPlotterHandl = File.open(intsctPlotter,"w")
-intsctPlotterHandl.puts(plotterRenderer.result())
-intsctPlotterHandl.close()
+plotter = "plot_#{xFileName}-#{yFileName}.R"
+plotterHandl = File.open(plotter,"w")
+plotterHandl.puts(plotterRenderer.result())
+plotterHandl.close()
 
 puts "Produce plot for +/- sequences..."
-%x(Rscript #{intsctPlotter} #{combinedCoords})
+%x(Rscript #{plotter} #{combinedCoords})
 %x(mv Rplots.pdf intersect_only_plot.pdf)
 
 puts "Filter sequences uniquely expressed in each assay..."
@@ -80,30 +82,29 @@ puts "Filter sequences uniquely expressed in each assay..."
 
 xFileUnique = "#{xFileStripped}.unique"
 yFileUnique = "#{yFileStripped}.unique"
+xFileCoordsZs = ""
+yFileCoordsZs = ""
 
-puts "Fill with corresponding 0's..."
-%x(add_zs.sh 1 #{xFileUnique})
-%x(add_zs.sh 0 #{yFileUnique})
+if(File.exist?(xFileUnique))
+    puts "Filling unique x coords with trailing 0's..."
+    %x(add_zs.sh 1 #{xFileUnique})
+    xFileCoordsZs = "#{xFileUnique}.zs"
+end
 
-xFileCoordsZs = "#{xFileUnique}.zs"
-yFileCoordsZs = "#{yFileUnique}.zs"
-
-puts "Write plotter for +/0 sequences..."
-plotterRenderer = ERB.new(File.read(plotterFileName))
-uniquePlotter = "plot_#{xFileName}-#{yFileName}_intersect_and_unique.R"
-uniquePlotterHandl = File.open(uniquePlotter,"w")
-uniquePlotterHandl.puts(plotterRenderer.result())
-uniquePlotterHandl.close()
+if(File.exist?(yFileUnique))
+   puts "Filling unique y coords with leading 0's..."
+   %x(add_zs.sh 0 #{yFileUnique})
+   yFileCoordsZs = "#{yFileUnique}.zs"
+end
 
 puts "Produce plot for +/0 sequences..."
-%x(Rscript #{uniquePlotter} #{combinedCoords} #{xFileCoordsZs} #{yFileCoordsZs})
+%x(Rscript #{plotter} #{combinedCoords} #{xFileCoordsZs} #{yFileCoordsZs})
 %x(mv Rplots.pdf intersect_and_unique_plot.pdf)
 
 puts "Move plots and data into separate directory..."
 %x(mkdir -p #{experiment})
-%x(mv #{combinedCoords} #{experiment}/)
-%x(mv #{xFileCoordsZs} #{experiment}/)
-%x(mv #{yFileCoordsZs} #{experiment}/)
+%x(mv *.combined #{experiment}/)
+%x(mv *.zs #{experiment}/)
 %x(mv *.pdf #{experiment}/)
 %x(mv *.R #{experiment}/)
 
