@@ -107,4 +107,11 @@ puts "Move plots and data into separate directory..."
 %x(mv *.pdf #{experiment}/)
 %x(mv *.R #{experiment}/)
 
+intermediate_dir = "#{experiment}_intermediate_files"
+
+puts "Move intermediate files into separate directory..."
+%x(mkdir -p #{intermediate_dir})
+%x(mv #{xFileName}.* #{intermediate_dir}/)
+%x(mv #{yFileName}.* #{intermediate_dir}/)
+
 puts "done."
