@@ -11,6 +11,7 @@ require 'erb'
 cfgFileName = ARGV[0]
 plotterFileName = ARGV[1]
 
+puts "Consume configuration..."
 cfgData = YAML.load_file(cfgFileName)
 experiment = cfgData['experiment']
 
@@ -22,6 +23,13 @@ xlab_left =   cfgData['xlab_left']
 xlab_right =  cfgData['xlab_right']
 ylab_top =    cfgData['ylab_top']
 ylab_bottom = cfgData['ylab_bottom']
+
+puts "Write plotter..."
+plotterRenderer = ERB.new(File.read(plotterFileName))
+plotter = "plot_#{xFileName}-#{yFileName}.R"
+plotterHandl = File.open(plotter,"w")
+plotterHandl.puts(plotterRenderer.result())
+plotterHandl.close()
 
 puts "Filtering insignificantly differentially expressed sequences out..."
 %x(ma_qual.rb #{xFileName} 0.05 false)
@@ -37,68 +45,75 @@ puts "Remove header..."
 %x(tail -n+2 #{xFileQual} > #{xFileStripped})
 %x(tail -n+2 #{yFileQual} > #{yFileStripped})
 
-puts "Join on common identifying attribute..."
-%x(ma_intersect.rb #{xFileStripped} #{yFileStripped})
-
-intsct = "#{xFileStripped}-#{yFileStripped}.intsct.csv"
-
-puts "Extract values used for coordinates..."
-%x(coord_extractor.sh #{intsct} 2)
-
-xCoords = "#{intsct}.odd_coords"
-yCoords = "#{intsct}.even_coords"
-
-if(cfgData['xfile']['reverse'])
-    puts "Reversing x values..."
-    %x(reverse_vals.sh #{xCoords})
-    xCoords = "#{xCoords}.reverse"
-end
-
-if(cfgData['yfile']['reverse'])
-    puts "Reversing y values..."
-    %x(reverse_vals.sh #{yCoords})
-    yCoords = "#{yCoords}.reverse"
-end
-
-combinedCoords = "#{xCoords}-#{yCoords}.combined"
-
-puts "Combine values..."
-%x(ma_coord_combiner.rb #{xCoords} #{yCoords})
-
-puts "Write plotter for +/- sequences..."
-plotterRenderer = ERB.new(File.read(plotterFileName))
-plotter = "plot_#{xFileName}-#{yFileName}.R"
-plotterHandl = File.open(plotter,"w")
-plotterHandl.puts(plotterRenderer.result())
-plotterHandl.close()
-
-puts "Produce plot for +/- sequences..."
-%x(Rscript #{plotter} #{combinedCoords})
-%x(mv Rplots.pdf intersect_only_plot.pdf)
-
-puts "Filter sequences uniquely expressed in each assay..."
-%x(filter_unique.sh #{xFileStripped} #{intsct})
-%x(filter_unique.sh #{yFileStripped} #{intsct})
-
 xFileUnique = "#{xFileStripped}.unique"
 yFileUnique = "#{yFileStripped}.unique"
-xFileCoordsZs = ""
-yFileCoordsZs = ""
 
-if(File.exist?(xFileUnique))
+combinedCoords = "#{xFileName}-#{yFileName}.origin"
+intsct = "#{xFileStripped}-#{yFileStripped}.intsct.csv"
+
+if(!File.zero?(xFileStripped) && !File.zero?(yFileStripped))
+    puts "Join on common identifying attribute..."
+    %x(ma_intersect.rb #{xFileStripped} #{yFileStripped})
+end
+
+if(File.exist?(intsct) && !File.zero?(intsct))
+    puts "Extract values used for coordinates..."
+    %x(coord_extractor.sh #{intsct} 2)
+
+    xCoords = "#{intsct}.odd_coords"
+    yCoords = "#{intsct}.even_coords"
+
+    if(cfgData['xfile']['reverse'])
+        puts "Reversing x values..."
+        %x(reverse_vals.sh #{xCoords})
+        xCoords = "#{xCoords}.reverse"
+    end
+
+    if(cfgData['yfile']['reverse'])
+        puts "Reversing y values..."
+        %x(reverse_vals.sh #{yCoords})
+        yCoords = "#{yCoords}.reverse"
+    end
+
+    combinedCoords = "#{xCoords}-#{yCoords}.combined"
+
+    puts "Combine values..."
+    %x(ma_coord_combiner.rb #{xCoords} #{yCoords})
+
+
+    puts "Produce plot for +/- sequences..."
+    %x(Rscript #{plotter} #{combinedCoords})
+    %x(mv Rplots.pdf intersect_only_plot.pdf)
+
+    puts "Filter sequences uniquely expressed in each assay..."
+    %x(filter_unique.sh #{xFileStripped} #{intsct})
+    %x(filter_unique.sh #{yFileStripped} #{intsct})
+else
+    combinedCoordsHandl = File.open(combinedCoords,"w")
+    combinedCoordsHandl.puts("0 0")
+    combinedCoordsHandl.close()
+    %x(cat #{xFileStripped} | awk -F' ' '{print $2}' > #{xFileUnique})
+    %x(cat #{yFileStripped} | awk -F' ' '{print $2}' > #{yFileUnique})
+end
+
+plot_args = combinedCoords
+
+if(File.exist?(xFileUnique) && !File.zero?(xFileUnique))
     puts "Filling unique x coords with trailing 0's..."
     %x(add_zs.sh 1 #{xFileUnique})
     xFileCoordsZs = "#{xFileUnique}.zs"
+    plot_args << " " << xFileCoordsZs
 end
 
-if(File.exist?(yFileUnique))
-   puts "Filling unique y coords with leading 0's..."
-   %x(add_zs.sh 0 #{yFileUnique})
-   yFileCoordsZs = "#{yFileUnique}.zs"
+if(File.exist?(yFileUnique) && !File.zero?(yFileUnique))
+    puts "Filling unique y coords with leading 0's..."
+    %x(add_zs.sh 0 #{yFileUnique})
+    yFileCoordsZs = "#{yFileUnique}.zs"
+    plot_args << " " << yFileCoordsZs
 end
 
 puts "Produce plot for +/0 sequences..."
-%x(Rscript #{plotter} #{combinedCoords} #{xFileCoordsZs} #{yFileCoordsZs})
+%x(Rscript #{plotter} #{plot_args})
 %x(mv Rplots.pdf intersect_and_unique_plot.pdf)
 
 puts "Move plots and data into separate directory..."
@@ -107,6 +122,7 @@ puts "Move plots and data into separate directory..."
 %x(mv *.zs #{experiment}/)
 %x(mv *.pdf #{experiment}/)
 %x(mv *.R #{experiment}/)
+%x(mv *.origin #{experiment}/)
 
 intermediate_dir = "#{experiment}_intermediate_files"
 

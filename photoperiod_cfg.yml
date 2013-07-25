@@ -5,7 +5,7 @@ xfile:
 yfile: 
     name: PBLD10-KCLD10
     reverse: false
-main_lab:   Photoperiodic Response at 1000
+main_lab:    Photoperiodic Response at 1000
 xlab_left:   Expression Increased in KCSD10
 xlab_right:  Expression Increased in PBSD10
 ylab_top:    Expression Increased in PBLD10
