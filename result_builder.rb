@@ -80,7 +80,6 @@ if(File.exist?(intsct) && !File.zero?(intsct))
     puts "Combine values..."
     %x(ma_coord_combiner.rb #{xCoords} #{yCoords})
 
-
     puts "Produce plot for +/- sequences..."
     %x(Rscript #{plotter} #{combinedCoords})
     %x(mv Rplots.pdf intersect_only_plot.pdf)
@@ -99,6 +98,12 @@ end
 plot_args = combinedCoords
 
 if(File.exist?(xFileUnique) && !File.zero?(xFileUnique))
+    if(cfgData['xfile']['reverse'])
+        puts "Reversing x values..."
+        %x(reverse_vals.sh #{xFileUnique})
+        xFileUnique = "#{xFileUnique}.reverse"
+    end
+
     puts "Filling unique x coords with trailing 0's..."
     %x(add_zs.sh 1 #{xFileUnique})
     xFileCoordsZs = "#{xFileUnique}.zs"
@@ -106,6 +111,12 @@ if(File.exist?(xFileUnique) && !File.zero?(xFileUnique))
 end
 
 if(File.exist?(yFileUnique) && !File.zero?(yFileUnique))
+    if(cfgData['yfile']['reverse'])
+        puts "Reversing y values..."
+        %x(reverse_vals.sh #{yFileUnique})
+        yFileUnique = "#{yFileUnique}.reverse"
+    end
+
     puts "Filling unique y coords with leading 0's..."
     %x(add_zs.sh 0 #{yFileUnique})
     yFileCoordsZs = "#{yFileUnique}.zs"

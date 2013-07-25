@@ -8,17 +8,15 @@ SUPER_SET=$1
 SUB_SET=$2 #filter these lines out
 RESULT=$SUPER_SET.unique
 FILTERED_GENES=$SUPER_SET.filtered
-POS_EXPR_GENES=$SUPER_SET.pos_expr_genes
-rm -f $FILTERED_GENES $POS_EXPR_GENES $RESULT #clear files (if they exist)
+rm -f $FILTERED_GENES $RESULT #clear files (if they exist)
 LC_ALL=C
 fgrep -vf $SUB_SET $SUPER_SET > $FILTERED_GENES
 while read line
 do
     VAL=$(echo $line | awk -F' ' '{print $2}')
-    if [ $(echo "$VAL > 0" | bc) -eq 1 ]; then
+    #if [ $(echo "$VAL > 0" | bc) -eq 1 ]; then
         echo $VAL >> $RESULT
-        echo $line >> $POS_EXPR_GENES
-    fi
+    #fi
     echo -n .
 done < "$FILTERED_GENES"
 echo done.
