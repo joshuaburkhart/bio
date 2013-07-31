@@ -120,6 +120,38 @@ def get(format,res)
     end
 end
 
+def downloadResults(res_ary)
+    res_ary.each{ |res|
+        if(res)
+            puts "Getting results for sequence #{res.seq_count}..."
+            attempts = 0
+            begin
+                get(TEXT,res)
+            rescue Errno::ECONNRESET => e
+                attempts += 1
+                if(attempts < 10)
+                    puts "Connection Reset. Waiting for retry..."
+                    sleep(30)
+                    res = put(res.seq_name,res.seq,res.seq_count)
+                    retry
+                else
+                    puts "Unable to get results for #{res}."
+                end
+            rescue Timeout::Error => t
+                attempts += 1
+                if(attempts < 10)
+                    puts "Timeout Error. Waiting for retry..."
+                    sleep(30)
+                    res = put(res.seq_name,res.seq)
+                    retry
+                else
+                    puts "Unable to get results for #{res}."
+                end
+            end
+        end
+    }
+end
+
 if(TESTING)
     res = put(TEST_SEQ_NAME,TEST_SEQ)
     get(TEXT,res)
@@ -147,38 +179,11 @@ else
             seq += line.strip
         end
         if(seq_count % 100 == 0)
-            res_ary.each{ |res|
-                if(res)
-                    puts "Getting results for sequence #{res.seq_count}..."
-                    attempts = 0
-                    begin
-                        get(TEXT,res)
-                    rescue Errno::ECONNRESET => e
-                        attempts += 1
-                        if(attempts < 10)
-                            puts "Connection Reset. Waiting for retry..."
-                            sleep(30)
-                            res = put(res.seq_name,res.seq,res.seq_count)
-                            retry
-                        else
-                            puts "Unable to get results for #{res}."
-                        end
-                    rescue Timeout::Error => t
-                        attempts += 1
-                        if(attempts < 10)
-                            puts "Timeout Error. Waiting for retry..."
-                            sleep(30)
-                            res = put(res.seq_name,res.seq)
-                            retry
-                        else
-                            puts "Unable to get results for #{res}."
-                        end
-                    end
-                end
-            }
+            downloadResults(res_ary)
             res_ary.clear
         end
     end
+    downloadResults(res_ary)
     fh.close
     puts "done."
 end
