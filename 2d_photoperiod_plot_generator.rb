@@ -1,8 +1,8 @@
 #!/usr/bin/ruby
 
-#Usage: result_builder.rb <YAML cfg file> <ERB template file>
+#Usage: 2d_photoperiod_plot_generator.rb <YAML cfg file> <ERB template file>
 
-#Example: result_builder.rb photoperiod_cfg.yml photoperiod_plotter.R.erb
+#Example: 2d_photoperiod_plot_generator.rb photoperiod_cfg.yml photoperiod_plotter.R.erb
 
 require 'yaml'
 YAML::ENGINE.yamler = 'syck'
