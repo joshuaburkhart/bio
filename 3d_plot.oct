@@ -1,0 +1,18 @@
+#!/usr/bin/octave
+
+#a = [[1,2,3];[2,3,4];[3,4,5];[4,5,6];[5,6,7]]
+#dlmwrite("test3d.csv",a," ")
+#a = dlmread("test3d.csv"," ")
+#delete("test3d.csv")
+
+a = dlmread("intsct.123",",")
+xx = a(:,1)
+yy = a(:,2)
+zz = a(:,3)
+abs_manhattan = abs(xx + yy + zz)
+scatter3(xx,yy,zz,5,abs_manhattan)
+title("ZT10 Day")
+xlabel("PBSD10 - PBLD10")
+ylabel("PBLD10 - KCLD10")
+zlabel("PBSD10 - KCSD10")
+pause()
