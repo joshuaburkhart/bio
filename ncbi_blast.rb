@@ -15,7 +15,7 @@ Put_Res = Struct.new(:rid,:seq_name,:seq,:seq_count)
 Format = Struct.new(:web_req_format,:file_suffix)
 HTML = Format.new("HTML","html")
 TEXT = Format.new("Text","txt")
-
+CONNECTION_EXCEPTIONS = [Errno::ECONNRESET,Timeout::Error]
 TEST_SEQ_NAME = "FJP1"
 TEST_SEQ = "cagattaaagatctgctggtgagcagcagcaccgatctggataccaccctggtgctggtgaacgcgatttattttaaaggcatgtggaaaaccgcgtttaacgcggaagatacccgcgaaatgccgtttcatgtgaccaaacaggaaagcaaaccggtgcagatgatgtgcatgaacaacagctttaacgtggcgaccctgccggcggaaaaaatgaaaattctggaactgccgtttgcgagcggcgatctgagcatgctggtgctgctgccggatgaagtgagcgatctggaacgcattgaaaaaaccattaactttgaaaaactgaccgaatggaccaacccgaacaccatggaaaaacgccgcgtgaaagtgtatctgccgcagatgaaaattgaagaaaaatataacctgaccagcgtgctgatggcgctgggcatgaccgatctgtttattccgagcgcgaacctgaccggcattagcagcgcggaaagcctgaaaattagccaggcggtgcatggcgcgtttatggaactgagcgaagatggcattgaaatggcgggcagcaccggcgtgattgaagatattaaacatagcccggaaagcgaacagtttcgcgcggatcatccgtttctgtttctgattaaacataacccgaccaacaccattgtgtattttggccgctattggagcccg"
 
@@ -120,34 +120,36 @@ def get(format,res)
     end
 end
 
+#pass method like self.method(:get)
+#pass params like TEXT,res
+def webCall(method,*params)
+    args_supplied = params.length
+    args_required = method.arity
+    if(args_required == args_supplied)
+        attempts = 0
+        begin
+            method[*params]
+        rescue *CONNECTION_EXCEPTIONS
+            attempts += 1
+            puts "Recovered from connection error..."
+            if(attempts < 10)
+                puts "Waiting to retry..."
+                sleep(30)
+                retry
+            else
+                puts "Unable to get results for #{params.join(', ')}."
+            end
+        end
+    else
+        raise ArgumentError, "wrong number of arguments (#{args_supplied} for #{args_required})"
+    end
+end
+
 def downloadResults(res_ary)
     res_ary.each{ |res|
         if(res)
             puts "Getting results for sequence #{res.seq_count}..."
-            attempts = 0
-            begin
-                get(TEXT,res)
-            rescue Errno::ECONNRESET => e
-                attempts += 1
-                if(attempts < 10)
-                    puts "Connection Reset. Waiting for retry..."
-                    sleep(30)
-                    res = put(res.seq_name,res.seq,res.seq_count)
-                    retry
-                else
-                    puts "Unable to get results for #{res}."
-                end
-            rescue Timeout::Error => t
-                attempts += 1
-                if(attempts < 10)
-                    puts "Timeout Error. Waiting for retry..."
-                    sleep(30)
-                    res = put(res.seq_name,res.seq)
-                    retry
-                else
-                    puts "Unable to get results for #{res}."
-                end
-            end
+            webCall(self.method(:get),TEXT,res)
         end
     }
 end
@@ -169,7 +171,7 @@ else
                 if(seq.length >= MIN_SEQ_LEN)
                     puts "seq_name: #{seq_name}"
                     puts "seq: #{seq}"
-                    res_ary << put(seq_name,seq,seq_count)
+                    res_ary << webCall(self.method(:put),seq_name,seq,seq_count)
                 end
             end
             seq_name = next_seq_name
