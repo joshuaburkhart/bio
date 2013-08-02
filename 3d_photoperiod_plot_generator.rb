@@ -26,7 +26,7 @@ ylab_top    = cfgData['ylab_top']
 ylab_bottom = cfgData['ylab_bottom']
 zlab_front  = cfgData['zlab_front']
 zlab_back   = cfgData['zlab_back']
-3d_dat_file = "intsct.123" #default
+dat_file = "intsct.123" #default
 
 puts "Write plotter..."
 plotterRenderer = ERB.new(File.read(plotterFileName))
@@ -69,9 +69,9 @@ if(File.exist?(intsct) && !File.zero?(intsct))
     puts "Extract values used for coordinates..."
     %x(coord_extractor.sh #{intsct} 2 3)
 
-    xCoords = "#{intsct}.1"
-    yCoords = "#{intsct}.2"
-    zCoords = "#{intsct}.3"
+    xCoords = "intsct.1"
+    yCoords = "intsct.2"
+    zCoords = "intsct.3"
 
     if(cfgData['xfile']['reverse'])
         puts "Reversing x values..."
@@ -85,24 +85,22 @@ if(File.exist?(intsct) && !File.zero?(intsct))
         yCoords = "#{yCoords}.reverse"
     end
 
-    if(cfgData['zfile']['reverse']
+    if(cfgData['zfile']['reverse'])
        puts "Reversing z values..."
        %x(reverse_vals.sh #{zCoords})
        zCoords = "#{zCoords}.reverse"
     end
 
-    combinedCoords = "#{xCoords}-#{yCoords}-#{zCoords}.combined"
+    combinedCoords = "intsct.123"
 
     puts "Combine values..."
     %x(paste #{xCoords} #{yCoords} #{zCoords} > #{combinedCoords})
 
-    puts "Produce plot for +/- sequences..."
-    %x(Rscript #{plotter} #{combinedCoords})
-    %x(mv Rplots.pdf intersect_only_plot.pdf)
+    puts "Formatting values..."
+    %x(sed -i 's/\t/,/g' intsct.123)
 
-    puts "Filter sequences uniquely expressed in each assay..."
-    %x(filter_unique.sh #{xFileStripped} #{intsct})
-    %x(filter_unique.sh #{yFileStripped} #{intsct})
+    puts "Produce plot for +/- sequences..."
+    %x(octave #{plotter} #{combinedCoords})
 end
 
 puts "Move plots and data into separate directory..."
@@ -112,6 +110,8 @@ puts "Move plots and data into separate directory..."
 %x(mv *.pdf #{experiment}/)
 %x(mv *.R #{experiment}/)
 %x(mv *.origin #{experiment}/)
+%x(mv intsct.* #{experiment}/)
+%x(mv *.oct #{experiment}/)
 
 intermediate_dir = "#{experiment}_intermediate_files"
 
