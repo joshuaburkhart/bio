@@ -1,0 +1,17 @@
+experiment: ZT-10_Day
+xfile: 
+    name: PBSD10-PBLD10
+    reverse: false
+yfile: 
+    name: PBLD10-KCLD10
+    reverse: false
+zfile:
+    name: PBSD10-KCSD10
+    reverse: false
+main_lab:    ZT 10 (Day)
+xlab_left:   PBSD10
+xlab_right:  PBLD10
+ylab_top:    PBLD10
+ylab_bottom: KCLD10
+zlab_front:  PBSD10
+zlab_back:   KCSD10
