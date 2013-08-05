@@ -2,7 +2,7 @@
 
 #Usage: 3d_photoperiod_plot_generator.rb <YAML cfg file> <ERB template file>
 
-#Example: 3d_photoperiod_plot_generator.rb photoperiod_cfg.3d.yml 3d_plot.oct.erb
+#Example: 3d_photoperiod_plot_generator.rb photoperiod_cfg.3d.yml photoperiod_plotter.3d.oct.erb
 
 require 'yaml'
 YAML::ENGINE.yamler = 'syck'
