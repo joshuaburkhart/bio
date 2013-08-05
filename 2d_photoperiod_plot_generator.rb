@@ -18,11 +18,11 @@ experiment = cfgData['experiment']
 xFileName = cfgData['xfile']['name']
 yFileName = cfgData['yfile']['name']
 
-main_lab =    cfgData['main_lab']
-xlab_left =   cfgData['xlab_left']
-xlab_right =  cfgData['xlab_right']
-ylab_top =    cfgData['ylab_top']
-ylab_bottom = cfgData['ylab_bottom']
+main_lab = cfgData['main_lab']
+xlab_pos = cfgData['xlab_pos']
+xlab_neg = cfgData['xlab_neg']
+ylab_pos = cfgData['ylab_pos']
+ylab_neg = cfgData['ylab_neg']
 
 puts "Write plotter..."
 plotterRenderer = ERB.new(File.read(plotterFileName))
@@ -60,8 +60,8 @@ if(File.exist?(intsct) && !File.zero?(intsct))
     puts "Extract values used for coordinates..."
     %x(coord_extractor.sh #{intsct} 2)
 
-    xCoords = "#{intsct}.odd_coords"
-    yCoords = "#{intsct}.even_coords"
+    xCoords = "intsct.1"
+    yCoords = "intsct.2"
 
     if(cfgData['xfile']['reverse'])
         puts "Reversing x values..."
@@ -75,10 +75,10 @@ if(File.exist?(intsct) && !File.zero?(intsct))
         yCoords = "#{yCoords}.reverse"
     end
 
-    combinedCoords = "#{xCoords}-#{yCoords}.combined"
+    combinedCoords = "intsct.12"
 
     puts "Combine values..."
-    %x(ma_coord_combiner.rb #{xCoords} #{yCoords})
+    %x(paste #{xCoords} #{yCoords} > #{combinedCoords})
 
     puts "Produce plot for +/- sequences..."
     %x(Rscript #{plotter} #{combinedCoords})
@@ -134,6 +134,7 @@ puts "Move plots and data into separate directory..."
 %x(mv *.pdf #{experiment}/)
 %x(mv *.R #{experiment}/)
 %x(mv *.origin #{experiment}/)
+%x(mv intsct.* #{experiment}/)
 
 intermediate_dir = "#{experiment}_intermediate_files"
 

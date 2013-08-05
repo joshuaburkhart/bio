@@ -172,6 +172,8 @@ else
                     puts "seq_name: #{seq_name}"
                     puts "seq: #{seq}"
                     res_ary << webCall(self.method(:put),seq_name,seq,seq_count)
+                else
+                    puts "Undersized query rejected. (#{seq.length} < #{MIN_SEQ_LEN})"
                 end
             end
             seq_name = next_seq_name

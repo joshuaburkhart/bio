@@ -19,13 +19,13 @@ xFileName = cfgData['xfile']['name']
 yFileName = cfgData['yfile']['name']
 zFileName = cfgData['zfile']['name']
 
-main_lab    = cfgData['main_lab']
-xlab_left   = cfgData['xlab_left']
-xlab_right  = cfgData['xlab_right']
-ylab_top    = cfgData['ylab_top']
-ylab_bottom = cfgData['ylab_bottom']
-zlab_front  = cfgData['zlab_front']
-zlab_back   = cfgData['zlab_back']
+main_lab = cfgData['main_lab']
+xlab_pos = cfgData['xlab_pos']
+xlab_neg = cfgData['xlab_neg']
+ylab_pos = cfgData['ylab_pos']
+ylab_neg = cfgData['ylab_neg']
+zlab_pos = cfgData['zlab_pos']
+zlab_neg = cfgData['zlab_neg']
 dat_file = "intsct.123" #default
 
 puts "Write plotter..."
