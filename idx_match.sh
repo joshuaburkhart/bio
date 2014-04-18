@@ -3,7 +3,7 @@
 #Example: ./idx_match.sh markers.txt singsnpstp.txt
 
 
-OUT_FILE=subsample_$(date -n | tr ' ' '-')
+OUT_FILE=subsample_$(date "+%N" | tr ' ' '-')
 
 touch $OUT_FILE
 
