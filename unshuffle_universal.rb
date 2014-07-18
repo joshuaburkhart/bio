@@ -12,12 +12,12 @@ unshuf_filehandl2 = File.open("#{$1}-unshuf_2.fastq","w")
 
 File.open(shuffled_filename,"r") do |shuffled_file|
 	while shuffled_file_line = shuffled_file.gets
-		if shuffled_file_line.match(/^#{seq_id}.*$/)
+		if shuffled_file_line.match(/^#{seq_id}.*1$/)
 			unshuf_filehandl1.print shuffled_file_line #sequence id
 			unshuf_filehandl1.print shuffled_file.gets #raw sequence letters
 			unshuf_filehandl1.print shuffled_file.gets #+
 			unshuf_filehandl1.print shuffled_file.gets #quality score
-		elsif shuffled_file_line.match(/^#{seq_id}.*$/)
+		elsif shuffled_file_line.match(/^#{seq_id}.*2$/)
 			unshuf_filehandl2.print shuffled_file_line #sequence id
 			unshuf_filehandl2.print shuffled_file.gets #raw sequence letters
 			unshuf_filehandl2.print shuffled_file.gets #+ line
