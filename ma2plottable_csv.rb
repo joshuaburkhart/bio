@@ -100,22 +100,22 @@ csvFh = File.open(CSV_FN, "w")
 
 puts "writing header to #{CSV_FN}..."
 
-seqId = "Sequence ID"
-xCoord = "X Coordinate from #{prettyMaXfn}"
-yCoord = "Y Coordinate from #{prettyMaYfn}"
-qX = "Q value from #{prettyMaXfn}"
-qY = "Q value from #{prettyMaYfn}"
-xQisLtLim = "X q<#{Q_LIMIT}?"
-yQisLtLim = "Y q<#{Q_LIMIT}?"
-qXandqYis0 = "X&Y = 0?"
-upLeft = "UpLeft"
-upRight = "UpRight"
-lowRight = "LowRight"
-lowLeft = "LowLeft"
-vertical = "Vertical"
-horizon = "Horizon"
+column_A = "Sequence ID"
+column_B = "X Coordinate from #{prettyMaXfn}"
+column_C = "Y Coordinate from #{prettyMaYfn}"
+column_D = "Q value from #{prettyMaXfn}"
+column_E = "Q value from #{prettyMaYfn}"
+column_F = "X q<#{Q_LIMIT}?"
+column_G = "Y q<#{Q_LIMIT}?"
+column_H = "X&Y = 0?"
+column_I = "UpLeft"
+column_J = "Vertical"
+column_K = "UpRight"
+column_L = "Horizon"
+column_M = "LowRight"
+column_N = "LowLeft"
 
-csvFh.puts "#{seqId},#{xCoord},#{yCoord},#{qX},#{qY},#{xQisLtLim},#{yQisLtLim},#{qXandqYis0},#{upLeft},#{vertical},#{upRight},#{horizon},#{lowRight},#{lowLeft}"
+csvFh.puts "#{column_A},#{column_B},#{column_C},#{column_D},#{column_E},#{column_F},#{column_G},#{column_H},#{column_I},#{column_J},#{column_K},#{column_L},#{column_M},#{column_N}"
 
 puts "writing data to #{CSV_FN}..."
 count = 0
@@ -129,22 +129,22 @@ deethsh.each { |kv_pair|
     xDataRow = maXhsh[kv_pair[0]]
     yDataRow = maYhsh[kv_pair[0]]
 
-    seqId = kv_pair[0]
-    xCoord = xDataRow.M
-    yCoord = yDataRow.M
-    qX = xDataRow.qvalue
-    qY = yDataRow.qvalue
-    xQisLtLim = xDataRow.M < Q_LIMIT ? xDataRow.qvalue : 0
-    yQisLtLim = yDataRow.M < Q_LIMIT ? yDataRow.qvalue : 0
-    qXandqYis0 = xQisLtLim == 0 && yQisLtLim == 0 ? T : F
-    upLeft = yCoord > 0 && xCoord < 0 ? T : F
-    upRight = yCoord > 0 && xCoord > 0 ? T : F
-    lowRight = yCoord < 0 && xCoord > 0 ? T : F
-    lowLeft = yCoord < 0 && xCoord < 0 ? T : F
-    vertical = xCoord == 0 ? T : F
-    horizon = yCoord == 0 ? T : F
+    column_A = kv_pair[0] #seqId
+    column_B = xDataRow.M
+    column_C = yDataRow.M
+    column_D = xDataRow.qvalue
+    column_E = yDataRow.qvalue
+    column_F = column_D < Q_LIMIT ? column_B : 0 #=IF(D2>0.0499999,0,B2)
+    column_G = column_E < Q_LIMIT ? column_C : 0 #=IF(E2>0.049999, 0, C2)
+    column_H = column_F == 0 && column_G == 0 ? T : F #=AND(F2=0, G2=0)
+    column_I = column_F < 0 && column_G > 0 ? T : F #=AND(F2<0, G2>0)
+    column_J = column_F == 0 && column_G != 0 ? T : F #=AND(F2=0, G2<>0)
+    column_K = column_F > 0 && column_G > 0 ? T : F #=AND(F2>0, G2>0)
+    column_L = column_F != 0 && column_G == 0 ? T : F #=AND(F2<>0, G2=0)
+    column_M = column_F > 0 && column_G < 0 ? T : F #=AND(F2>0, G2<0)
+    column_N = column_F < 0 && column_G < 0 ? T : F #=AND(F2<0, G2<0)
 
-    csvFh.puts "#{seqId},#{xCoord},#{yCoord},#{qX},#{qY},#{xQisLtLim},#{yQisLtLim},#{qXandqYis0},#{upLeft},#{vertical},#{upRight},#{horizon},#{lowRight},#{lowLeft}"
+    csvFh.puts "#{column_A},#{column_B},#{column_C},#{column_D},#{column_E},#{column_F},#{column_G},#{column_H},#{column_I},#{column_J},#{column_K},#{column_L},#{column_M},#{column_N}"
 
     count += 1
   end
