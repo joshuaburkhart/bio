@@ -137,12 +137,12 @@ deethsh.each { |kv_pair|
     column_F = column_D < Q_LIMIT ? column_B : 0 #=IF(D2>0.0499999,0,B2)
     column_G = column_E < Q_LIMIT ? column_C : 0 #=IF(E2>0.049999, 0, C2)
     column_H = column_F == 0 && column_G == 0 ? T : F #=AND(F2=0, G2=0)
-    column_I = column_F < 0 && column_G > 0 ? T : F #=AND(F2<0, G2>0)
-    column_J = column_F == 0 && column_G != 0 ? T : F #=AND(F2=0, G2<>0)
-    column_K = column_F > 0 && column_G > 0 ? T : F #=AND(F2>0, G2>0)
-    column_L = column_F != 0 && column_G == 0 ? T : F #=AND(F2<>0, G2=0)
-    column_M = column_F > 0 && column_G < 0 ? T : F #=AND(F2>0, G2<0)
-    column_N = column_F < 0 && column_G < 0 ? T : F #=AND(F2<0, G2<0)
+    column_I = column_F < 0 && column_G > 0 ? T : F #=AND(F2<0, G2>0) -- UpLeft
+    column_J = column_F == 0 && column_G != 0 ? T : F #=AND(F2=0, G2<>0) -- Vertical
+    column_K = column_F > 0 && column_G > 0 ? T : F #=AND(F2>0, G2>0) -- UpRight
+    column_L = column_F != 0 && column_G == 0 ? T : F #=AND(F2<>0, G2=0) -- Horizon
+    column_M = column_F > 0 && column_G < 0 ? T : F #=AND(F2>0, G2<0) -- LowRight
+    column_N = column_F < 0 && column_G < 0 ? T : F #=AND(F2<0, G2<0) -- LowLeft
 
     csvFh.puts "#{column_A},#{column_B},#{column_C},#{column_D},#{column_E},#{column_F},#{column_G},#{column_H},#{column_I},#{column_J},#{column_K},#{column_L},#{column_M},#{column_N}"
 
