@@ -1,0 +1,9 @@
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/kc/1130/1130_NoIndex.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/kc/1179/1179_NoIndex.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/kc/1180/1180_NoIndex.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/wi_gen/1132_NoIndex_R1.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/wi_gen/1132_NoIndex_R2.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/wiob_gen/1133_NoIndex_R1.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/wiob_gen/1133_NoIndex_R2.fastq
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/mate_pair/lane2_GCCAAT_L002_R1.fastq.gz
+jburkhar@ftn.aciss.uoregon.edu:/home0/jburkhar/Wyeomyia/reads/mate_pair/lane2_GCCAAT_L002_R2.fastq.gz
