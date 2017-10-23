@@ -125,10 +125,14 @@ deethsh.each { |kv_pair|
     STDOUT.flush
   end
   deetDataRow = kv_pair[1]
-  if (deetDataRow.status == 2 || deetDataRow.status == 3)
+  #if (deetDataRow.status == 2 || deetDataRow.status == 3)
     xDataRow = maXhsh[kv_pair[0]]
     yDataRow = maYhsh[kv_pair[0]]
 
+  if(!xDataRow.nil? &&
+    !yDataRow.nil? &&
+    !xDataRow.M.nil? &&
+    !yDataRow.M.nil?)
     column_A = kv_pair[0] #seqId
     column_B = xDataRow.M
     column_C = yDataRow.M
@@ -154,4 +158,3 @@ csvFh.close
 puts
 puts "#{count} data rows written to #{CSV_FN}."
 puts "done."
-
